@@ -18,7 +18,7 @@ float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][5]={0},avr[5]={0.025,0.025,0.05,0.1,0.8};
 unsigned int left,right,middle;//车子在赛道的位置标志
 unsigned int count1=0,count2=0;
-float  kp1=9.5,ki=0,kd1=0.5,   //分段PID参数
+float  kp1=8.2,ki=0,kd1=0,   //分段PID参数
 		kp2=0.2,ki2=0,kd2=0.2,
 		kp3=0.5,ki3=0,kd3=0.25;
 float kp,ki,kd;
@@ -105,11 +105,11 @@ void frequency_measure(void)
 *****************************************************************************************************************/
 void position(void)
 {
-	if(LEFT<=563&&RIGHT<=569)
+	if(LEFT<=563&&RIGHT<=571)
 		middle=1;
-	if(LEFT<=563&&RIGHT>=569)
+	if(LEFT<563&&RIGHT>571)
 		left=1;
-	if(LEFT>=563&&RIGHT<=569)
+	if(LEFT>563&&RIGHT<571)
 		right=1;
 }
 
@@ -228,16 +228,16 @@ signed int LocPIDCal(void)
 	dError=iError-se->LastError;
 	se->LastError=iError;
 			
-	if(MIDDLE>=518||((LEFT+8-RIGHT)<1&&(LEFT+8-RIGHT)>-1))  //中间线圈判定，此时偏移量在7厘米内
+	if(MIDDLE>=522/*||((LEFT+8-RIGHT)<1&&(LEFT+8-RIGHT)>-1)*/)  //中间线圈判定，此时偏移量在7厘米内
 	{
 		return(kp1*iError+kd1*dError);
 	}
 	else            //此时偏移量大于7厘米
 	{
-		if(left==1)
-			return(540);
-		if(right==1)
-			return(840);
+		if((LEFT+9-RIGHT)<0)
+			return(-150);
+		else
+			return(150);
 		
 	} 
 	
@@ -261,10 +261,6 @@ void sensor_display(void)
 	Dis_Num(64,1,(WORD)MIDDLE,5);
 	//LCD_Print(8,2,"Right:");
 	Dis_Num(64,2,(WORD)RIGHT,5);
-	Dis_Num(64,4,(WORD)right,5);
-	    	Dis_Num(64,5,(WORD)left,5);
-	    	left=0;
-	    	right=0;
 }
 
 /****************************************************************************************************************
