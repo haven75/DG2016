@@ -228,7 +228,7 @@ signed int LocPIDCal(void)
 	dError=iError-se->LastError;
 	se->LastError=iError;
 			
-	if(MIDDLE>=522||((LEFT+9-RIGHT)<1&&(LEFT+9-RIGHT)>-1))  //中间线圈判定，此时偏移量在7厘米内
+	if(MIDDLE>=522/*||((LEFT+9-RIGHT)<1&&(LEFT+9-RIGHT)>-1)*/)  //中间线圈判定，此时偏移量在7厘米内
 	{
 		return(kp1*iError+kd1*dError);
 	}
