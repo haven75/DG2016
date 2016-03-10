@@ -1,6 +1,14 @@
 #include "includes.h"
-int Flag=0;
+int Flag;
 signed int steer=0;
+extern struct PID{
+float SetPoint;
+float Proportion;
+float Integral;
+float Derivative;
+long SumError;
+int LastError;
+int PrevError; }spPID,sePID;
 
 
 
@@ -8,10 +16,10 @@ signed int steer=0;
 void main(void)
 {
 	initALL();
-	InitsePID();
+	
   for (;;) 
   {
-    if(Flag==1)
+    if(Flag)
     	{
     	sensor_display();
     	position();
@@ -23,6 +31,9 @@ void main(void)
     		steer=840;
     	Dis_Num(64,3,(WORD)steer,5);
     	SET_steer(steer);
+
+		Dis_Num(64, 5, (WORD)sePID.Proportion, 5);
+
     	}
     Flag=0;
   }
