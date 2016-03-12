@@ -1,4 +1,5 @@
 /*
+ /*
  * functions.c
  *
  *  Created on: Feb 27, 2016
@@ -13,26 +14,16 @@
  *      Author: Administrator
  */
 #include"includes.h"
-float LEFT,LEFT_old,LEFT_new=0,RIGHT,RIGHT_old,RIGHT_new=0,MIDDLE,MIDDLE_old,MIDDLE_new=0;
+float fre_diff,dis,LEFT,LEFT_old,LEFT_new=0,RIGHT,RIGHT_old,RIGHT_new=0,MIDDLE,MIDDLE_old,MIDDLE_new=0,temp_steer,middleflag=0;
 float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][5]={0},avr[5]={0.025,0.025,0.05,0.1,0.8};
-unsigned int left,right,middle;//车子在赛道的位置标志
+unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned int count1=0,count2=0;
-float  kp1=8.2,ki=0,kd1=0,   //分段PID参数
-		kp2=0.2,ki2=0,kd2=0.2,
-		kp3=0.5,ki3=0,kd3=0.25;
+float  kp1=15,ki=0,kd1=15,   //大弯
+		kp2=9,ki2=0,kd2=4,  //小弯
+		kp3=4,ki3=0,kd3=2;//直道PID
 float kp,ki,kd;
-
-struct PID
-{
-	float SetPoint;
-	float Proportion;
-	float Integral;
-	float Derivative;
-	long SumError;
-	int LastError;
-	int PrevError;
-}spPID, sePID;
+extern float Msetpoint=0,temp_middle=0,sensor_compensator=0;
 
 
 /****************************************************************************************************************
@@ -116,11 +107,12 @@ void frequency_measure(void)
 *****************************************************************************************************************/
 void position(void)
 {
-	if(LEFT<=563&&RIGHT<=571)
-		middle=1;
-	if(LEFT<563&&RIGHT>571)
+	fre_diff=LEFT-RIGHT+sensor_compensator;
+	if(fre_diff==0)
+		middle=1; 
+	if(fre_diff<0/*LEFT<563&&RIGHT>571*/)
 		left=1;
-	if(LEFT>563&&RIGHT<571)
+	if(fre_diff>0/*LEFT>563&&RIGHT<571*/)
 		right=1;
 }
 
@@ -135,14 +127,16 @@ void position(void)
 *****************************************************************************************************************/
 void GETservoPID(void)
 {
-	if(middle)
+	if(middle==1)
 		;
-	else if(left)
+	else if(left==1)
 	{
 		if(LEFT<=563&&RIGHT>=569)
 		{
-			
-			sePID.Proportion = kp1;
+			//se->Proportion=kp1;  传递不了值
+			//se->Derivative=kd1;
+			kp=kp1;
+			kd=kd1;
 		}
 	/*	if(RIGHT>2610&&RIGHT<=2620)
 		{
@@ -155,13 +149,14 @@ void GETservoPID(void)
 			se->Derivative=kd3;
 		}*/
 	}
-	else if(right)
+	else if(right==1)
 	{
 		if(LEFT>=563&&RIGHT<=569)
 		{
 			//se->Proportion=kp1;
 			//se->Derivative=kd1;
-			
+			kp=kp1;
+			kd=kd1;
 		}
 	/*	if(LEFT>2610&&LEFT<=2620)
 		{
@@ -188,33 +183,87 @@ void GETservoPID(void)
 *****************************************************************************************************************/
 signed int LocPIDCal(void)
 {
-	register int iError,dError;
-	unsigned int Nextpoint;
+	register float iError,dError;
 	
-	sePID.SetPoint=LEFT+9;
-	Nextpoint=RIGHT;
-	
-	iError=sePID.SetPoint-Nextpoint; 
-	sePID.SumError+=iError;
-	dError=iError-sePID.LastError;
-	sePID.LastError=iError;
-			
-	if(MIDDLE>=522/*||((LEFT+9-RIGHT)<1&&(LEFT+9-RIGHT)>-1)*/)  //中间线圈判定，此时偏移量在7厘米内
+//	if(((flag==1)&&(LEFT<572))||((flag==2)&&(RIGHT<580)))
+	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))    //左右打死保持
 	{
-		return(kp1*iError+kd1*dError);
+		if(flag==1)
+			return(165);
+		else if(flag==2)
+			return(-165);
 	}
-	else            //此时偏移量大于7厘米
+	else                                   
 	{
-		if((LEFT+9-RIGHT)<0)
-			return(-150);
-		else
-			return(150);
+		if(MIDDLE<=Msetpoint)      //中间线圈判定频率偏差大小
+		{
+			middleflag++;
+			if(middleflag>=50)           //u形弯处理
+			{
+				if(fre_diff>=0)
+					return(165);
+				else
+					return(-165);
+			}
+			if(fre_diff>=0) 
+				fre_diff=21-fre_diff;
+			else if(fre_diff>=-11)
+				fre_diff=-27-fre_diff;
+		}
+		middleflag=0;
 		
-	} 
-	
-	//return(kp1*iError+kd1*dError);
-	//return(se->Proportion*iError+se->Integral*se->SumError+se->Derivative*dError);
-	//return(kp*iError+kd*dError);
+		iError=fre_diff; 
+		se->SumError+=iError;
+		dError=iError-se->LastError;
+		se->LastError=iError;
+		
+		/*iError=se->SetPoint-Nextpoint; 
+		se->SumError+=iError;
+		dError=iError-se->LastError;
+		se->LastError=iError;*/
+			
+		if(fre_diff>=-3&&fre_diff<=3)      //直道
+		{
+			flag=0;
+			kp=kp3;
+			kd=kd3;
+		}
+		else if(fre_diff>=-8&&fre_diff<=8)                                //小弯
+		{
+			if(fre_diff>=0)
+			{
+				kp=kp2+(kp2-kp3)/5*(fre_diff-3);
+				kd=kd2;
+			}
+			else
+			{
+				kp=kp2+(kp2-kp3)/5*(-fre_diff-3);
+				kd=kd2;
+			}					
+		}
+		else                    //大弯
+		{
+			if(fre_diff>=0)
+			{
+				kp=kp2+(kp1-kp2)/15*(fre_diff-8);
+				kd=kd3;
+			}
+			else
+			{
+				kp=kp2+(kp1-kp2)/15*(-fre_diff-8);
+				kd=kd3;
+			}								
+		}
+		temp_steer=kp*iError+kd*dError;
+		if(temp_steer>=165)
+			flag=1;               //左打死
+		else if(temp_steer<=-168)
+			flag=2;
+		else 
+			flag=0;
+		return(temp_steer);
+	}
+
 }
 /****************************************************************************************************************
 * 函数名称：sensor_display()	
@@ -288,4 +337,13 @@ unsigned int Get_speed()  //定时2mse采速度
 	count1=0;
 	PIT.CH[1].TFLG.B.TIF=1;
 	return(speed);
+}
+
+void Set_Middlepoint()
+{
+	temp_middle=MIDDLE-2;
+	sensor_compensator=RIGHT-LEFT;
+	Msetpoint=temp_middle;
+	Dis_Num(64,4,(WORD)sensor_compensator,5);
+	Dis_Num(64,5,(WORD)Msetpoint,5);
 }
