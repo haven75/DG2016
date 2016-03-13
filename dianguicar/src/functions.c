@@ -16,15 +16,14 @@
 #include"includes.h"
 float fre_diff,dis,LEFT,LEFT_old,LEFT_new=0,RIGHT,RIGHT_old,RIGHT_new=0,MIDDLE,MIDDLE_old,MIDDLE_new=0,temp_steer;
 float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
-float sensor[3][5]={0},avr[5]={0.025,0.025,0.05,0.1,0.8};
+float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned int count1=0,count2=0;
 float  kp1=15,ki=0,kd1=5,   //大弯
 		kp2=9,ki2=0,kd2=3,  //小弯
 		kp3=5,ki3=0,kd3=2;//直道PID
 float kp,ki,kd;
-extern float Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0;
-unsigned char data[2];
+extern float Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
 
 
 /****************************************************************************************************************
@@ -75,19 +74,19 @@ void frequency_measure(void)
 	MIDDLE_old=MIDDLE_new;
 	
 
-	for(i=0;i<4;i++)
+	for(i=0;i<9;i++)
 	{
 		sensor[0][i]=sensor[0][i+1];
 		sensor[1][i]=sensor[1][i+1];
 		sensor[2][i]=sensor[2][i+1];
 	}
-	sensor[0][4]=LEFT_Temp;
-	sensor[1][4]=MIDDLE_Temp;
-	sensor[2][4]=RIGHT_Temp;
+	sensor[0][9]=LEFT_Temp;
+	sensor[1][9]=MIDDLE_Temp;
+	sensor[2][9]=RIGHT_Temp;
 	Lsum=0;
 	Msum=0;
 	Rsum=0;
-	for( j=0;j<5;j++)
+	for( j=0;j<10;j++)
 	{
 		Lsum+=sensor[0][j]*avr[j];
 		Msum+=sensor[1][j]*avr[j];
@@ -194,6 +193,8 @@ signed int LocPIDCal(void)
 {
 	register float iError,dError;
 	
+	//if((LEFT>=start_left+8)&&(RIGHT>=start_right+8))  // 过十字
+		//return(0);
 //	if(((flag==1)&&(LEFT<572))||((flag==2)&&(RIGHT<580)))
 	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))    //左右打死保持
 	{
@@ -361,32 +362,18 @@ unsigned int Get_speed()  //定时2mse采速度
 	return(speed);
 }
 
-
-/****************************************************************************************************************
-* 函数名称：Set_Middlepoint()	
-* 函数功能：自动标定中间线圈值
-* 入口参数：无
-* 出口参数：无
-* 修改人  ：温泉
-* 修改时间：2016/03/11
-*****************************************************************************************************************/
 void Set_Middlepoint()
 {
-	temp_middle=MIDDLE-0.3;  
+	temp_middle=MIDDLE+24;
+	start_left=LEFT;
+	start_right=RIGHT;
 	sensor_compensator=RIGHT-LEFT;
 	Msetpoint=temp_middle;
 	Dis_Num(64,5,(WORD)Msetpoint,5);
 }
 
 
-/****************************************************************************************************************
-* 函数名称：SendHex(unsigned char hex)	
-* 函数功能：ASCII码发送
-* 入口参数：无
-* 出口参数：无
-* 修改人  ：温泉
-* 修改时间：2016/03/12
-*****************************************************************************************************************/
+
 void SendHex(unsigned char hex) 
 {
     unsigned char temp;
@@ -409,21 +396,12 @@ void SendHex(unsigned char hex)
     	 LINFlex_TX(temp - 10 + 'A');
       }
 }
-/****************************************************************************************************************
-* 函数名称：Senddata()	
-* 函数功能: 数值发送接口函数
-* 入口参数：无
-* 出口参数：无
-* 修改人  ：温泉
-* 修改时间：2016/03/12
-*****************************************************************************************************************/
+
 void Senddata()
 {
 	LINFlex_TX('=');
 	LINFlex_TX('=');
-	data[0]=(unsigned char)fre_diff;
-	data[1]=(unsigned char)((int)fre_diff>>8);
-	SendHex(data[0]);
-	SendHex(data[1]);	
+	SendHex((unsigned char)fre_diff);
+	
 }
 
