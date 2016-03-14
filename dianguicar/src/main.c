@@ -1,6 +1,6 @@
 #include "includes.h"
-int Flag=0,wait=4;
-signed int steer=0;
+int Flag,wait=4;
+int steer;
 
 
 
@@ -9,26 +9,27 @@ signed int steer=0;
 void main(void)
 {
 	initALL();
-	while(wait>0)
-		;
-	Set_Middlepoint();
-	for (;;) 
+	if (wait <= 0)
 	{
-		if(Flag==1)
+		Set_Middlepoint();
+		while (1)
 		{
-			sensor_display();
-			position();
-			GETservoPID();
-			steer=STEER_HELM_CENTER+LocPIDCal();
-			if(steer<522)
-				steer=522;
-			if(steer>855)
-				steer=855;
-			Dis_Num(64,3,(WORD)steer,5);
-			SET_steer(steer);
-			Senddata();
+			if(Flag)
+			{
+				sensor_display();
+				position();
+				GETservoPID();
+				steer=STEER_HELM_CENTER+LocPIDCal();
+				if(steer<522)
+					steer=522;
+				if(steer>855)
+					steer=855;
+				Dis_Num(64,3,(WORD)steer,5);
+				SET_steer(steer);
+				Senddata();
+			}
+			Flag=0;
 		}
-		Flag=0;
 	}
 }
 

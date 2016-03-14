@@ -14,11 +14,11 @@
  *      Author: Administrator
  */
 #include"includes.h"
-float fre_diff,dis,LEFT,LEFT_old,LEFT_new=0,RIGHT,RIGHT_old,RIGHT_new=0,MIDDLE,MIDDLE_old,MIDDLE_new=0,temp_steer;
+float fre_diff,dis,LEFT,LEFT_old,LEFT_new,RIGHT,RIGHT_old,RIGHT_new,MIDDLE,MIDDLE_old,MIDDLE_new,temp_steer;
 float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
-unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
-unsigned int count1=0,count2=0;
+unsigned int left,right,middle,flag;//车子在赛道的位置标志
+unsigned int count1,count2;
 float  kp1=15,ki=0,kd1=5,   //大弯
 		kp2=9,ki2=0,kd2=3,  //小弯
 		kp3=5,ki3=0,kd3=2;//直道PID
@@ -172,14 +172,6 @@ void GETservoPID(void)
 }
 
 
-/****************************************************************************************************************
-* 函数名称：InitsePID()	
-* 函数功能：初始化舵机的PID参数
-* 入口参数：无
-* 出口参数：无
-* 修改人  ：温泉
-* 修改时间：2016/02/18
-*****************************************************************************************************************/
 
 /****************************************************************************************************************
 * 函数名称：LocPIDCal()	
