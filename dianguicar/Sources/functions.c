@@ -18,17 +18,14 @@ float fre_diff,dis,LEFT,LEFT_old,LEFT_new=0,RIGHT,RIGHT_old,RIGHT_new=0,MIDDLE,M
 float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
-unsigned int count1,count2,currentspeed;
+unsigned int count1=0,count2=0;
 float  kp1=16,ki=0,kd1=4,   // 分段PID
 		kp2=9,ki2=0,kd2=2.5,  
-		kp3=5,ki3=0,kd3=1,
-		kp4=2,ki4=0,kd4=0;    
+		kp3=5.5,ki3=0,kd3=1,
+		kp4=2.5,ki4=0,kd4=0.1;    
 float kp,ki,kd;
 int temp_fre[2];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
-int Set_speed,temp_speed;
-float speed_kp,speed_ki,speed_kd,speed_iError,speed_lastError,speed_prevError;
-
 
 
 /****************************************************************************************************************
@@ -202,6 +199,8 @@ signed int LocPIDCal(void)
 	//	return(0);
 //	if(((flag==1)&&(LEFT<572))||((flag==2)&&(RIGHT<580)))
 	
+
+	Dis_Num(64,6,(WORD)Msetpoint,5);	
 	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint)) //左右打死保持
 	{
 		middleflag++;
@@ -228,19 +227,18 @@ signed int LocPIDCal(void)
 					flag=2;
 					return(-165);
 				}
-			}
-			
+			}         
 			if(fre_diff>=0) 
-				fre_diff=21-fre_diff;
+				fre_diff=18-fre_diff;
 			else if(fre_diff>=-11)
-				fre_diff=-23-fre_diff;
+				fre_diff=-21-fre_diff;
 		
 		}   
 		else
 			middleflag=0;	
 		
-		/*if(fre_diff>=0)
-			fre_diff+=1;*/
+		if(fre_diff>=0)
+			fre_diff+=1;
 		
 		
 		iError=fre_diff; 
@@ -373,60 +371,18 @@ void SAIC1_inter(void)
 * 修改人  ：温泉
 * 修改时间：2016/02/23
 *****************************************************************************************************************/
-void Get_speed()  //定时2mse采速度
+unsigned int Get_speed()  //定时2mse采速度
 {
+	unsigned int speed;
 	if(forward)
-		currentspeed=count1;
+		speed=count1;
 	else
-		currentspeed=-count1;
+		speed=-count1;
 	count1=0;
 	PIT.CH[1].TFLG.B.TIF=1;
+	return(speed);
 }
-/****************************************************************************************************************
-* 函数名称：speed_set( )	
-* 函数功能：速度设定
-* 出口参数：无
-* 修改人  ：温泉
-* 修改时间：2016/03/16
-*****************************************************************************************************************/
-void speed_set()
-{
-	if(fre_diff>-2&&fre_diff<2)
-		Set_speed=Strait;
-	if(fre_diff>=-5&&fre_diff<=5)
-		Set_speed=Littleround;
-	if(fre_diff>=-7&&fre_diff<=7)
-		Set_speed=LittleSround;
-	if(middleflag>28)
-		Set_speed=Uround;
-	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))     //判定不严谨
-		Set_speed=Biground;
-}
-/****************************************************************************************************************
-* 函数名称：speed_control( )	
-* 函数功能：速度控制
-* 出口参数：无
-* 修改人  ：温泉
-* 修改时间：2016/03/16
-*****************************************************************************************************************/
-void speed_control()
-{
-	speed_iError=Set_speed-currentspeed;
-	
-	temp_speed=speed_kp*speed_iError-speed_ki*speed_lastError+speed_kd*speed_prevError;
-	SET_motor(temp_speed);
-	
-	speed_prevError=speed_lastError;
-	speed_lastError=speed_iError;
-}
-/****************************************************************************************************************
-* 函数名称：Set_Middlepoint()	
-* 函数功能：中间线圈频率标定
-* 入口参数：无
-* 出口参数：无
-* 修改人  ：温泉
-* 修改时间：2016/02/23
-*****************************************************************************************************************/
+
 void Set_Middlepoint()
 {
 	temp_middle=MIDDLE-11;
@@ -434,7 +390,7 @@ void Set_Middlepoint()
 	start_right=RIGHT-14;
 	sensor_compensator=RIGHT-LEFT;
 	Msetpoint=temp_middle;
-	Dis_Num(64,6,(WORD)Msetpoint,5);
+//	Dis_Num(64,6,(WORD)Msetpoint,5);
 }
 
 
