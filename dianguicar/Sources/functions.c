@@ -14,20 +14,21 @@
  *      Author: Administrator
  */
 #include"includes.h"
-float fre_diff,dis,LEFT,LEFT_old,LEFT_new,RIGHT,RIGHT_old,RIGHT_new=0,MIDDLE,MIDDLE_old,MIDDLE_new,temp_steer;
+float fre_diff,dis,LEFT,LEFT_old,LEFT_new=0,RIGHT,RIGHT_old,RIGHT_new=0,MIDDLE,MIDDLE_old,MIDDLE_new=0,temp_steer;
 float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
-unsigned int count1=0,count2=0,currentspeed;
-float  kp1=16,ki=0,kd1=4,   // 分段PID
-		kp2=9,ki2=0,kd2=2.5,  
-		kp3=5.5,ki3=0,kd3=1,
-		kp4=2.5,ki4=0,kd4=0.1;    
+unsigned int count1,count2,currentspeed;
+float  	kp1=15.5,ki=0,kd1=4,// 分段PID
+		kp2=10,ki2=0,kd2=2.5,  
+		kp3=6.5,ki3=0,kd3=1,
+		kp4=2.5,ki4=0,kd4=00.5;    
 float kp,ki,kd;
 int temp_fre[2];
-float sumerror,lasterror,Msetpoint,temp_middle,sensor_compensator,middleflag,start_left,start_right;
+float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
 int Set_speed,temp_speed;
 float speed_kp,speed_ki,speed_kd,speed_iError,speed_lastError,speed_prevError;
+
 
 
 /****************************************************************************************************************
@@ -135,7 +136,7 @@ void GETservoPID(void)
 		;
 	else if(left==1)
 	{
-		if(LEFT<=563&&RIGHT>=569)
+		if(LEFT<=567&&RIGHT>=575)
 		{
 			//se->Proportion=kp1;  传递不了值
 			//se->Derivative=kd1;
@@ -155,7 +156,7 @@ void GETservoPID(void)
 	}
 	else if(right==1)
 	{
-		if(LEFT>=563&&RIGHT<=569)
+		if(LEFT>=567&&RIGHT<=75)
 		{
 			//se->Proportion=kp1;
 			//se->Derivative=kd1;
@@ -201,8 +202,6 @@ signed int LocPIDCal(void)
 	//	return(0);
 //	if(((flag==1)&&(LEFT<572))||((flag==2)&&(RIGHT<580)))
 	
-
-	Dis_Num(64,6,(WORD)Msetpoint,5);	
 	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint)) //左右打死保持
 	{
 		middleflag++;
@@ -229,9 +228,10 @@ signed int LocPIDCal(void)
 					flag=2;
 					return(-165);
 				}
-			}         
+			}
+			
 			if(fre_diff>=0) 
-				fre_diff=18-fre_diff;
+				fre_diff=19-fre_diff;
 			else if(fre_diff>=-11)
 				fre_diff=-21-fre_diff;
 		
@@ -239,8 +239,8 @@ signed int LocPIDCal(void)
 		else
 			middleflag=0;	
 		
-		if(fre_diff>=0)
-			fre_diff+=1;
+		/*if(fre_diff>=0)
+			fre_diff+=1;*/
 		
 		
 		iError=fre_diff; 
@@ -273,7 +273,7 @@ signed int LocPIDCal(void)
 				kd=kd3;
 			}					
 		}
-		else if(fre_diff>=-7&&fre_diff<=7)                                //小弯
+		else if(fre_diff>=-8&&fre_diff<=8)                                //小弯
 		{
 			if(fre_diff>=0)
 			{
@@ -290,12 +290,12 @@ signed int LocPIDCal(void)
 		{
 			if(fre_diff>=0)
 			{
-				kp=kp2+(kp1-kp2)/13*(fre_diff-7);
+				kp=kp2+(kp1-kp2)/13*(fre_diff-8);
 				kd=kd3;
 			}
 			else
 			{
-				kp=kp2+(kp1-kp2)/13*(-fre_diff-7);
+				kp=kp2+(kp1-kp2)/13*(-fre_diff-8);
 				kd=kd3;
 			}								
 		}
@@ -373,28 +373,15 @@ void SAIC1_inter(void)
 * 修改人  ：温泉
 * 修改时间：2016/02/23
 *****************************************************************************************************************/
-unsigned int Get_speed()  //定时2mse采速度
+void Get_speed()  //定时2mse采速度
 {
-	unsigned int speed;
 	if(forward)
-		speed=count1;
+		currentspeed=count1;
 	else
-		speed=-count1;
+		currentspeed=-count1;
 	count1=0;
 	PIT.CH[1].TFLG.B.TIF=1;
-	return(speed);
 }
-
-void Set_Middlepoint()
-{
-	temp_middle=MIDDLE-11;
-	start_left=LEFT-14;
-	start_right=RIGHT-14;
-	sensor_compensator=RIGHT-LEFT;
-	Msetpoint=temp_middle;
-//	Dis_Num(64,6,(WORD)Msetpoint,5);
-}
-
 /****************************************************************************************************************
 * 函数名称：speed_set( )	
 * 函数功能：速度设定
@@ -449,6 +436,7 @@ void Set_Middlepoint()
 	Msetpoint=temp_middle;
 	Dis_Num(64,6,(WORD)Msetpoint,5);
 }
+
 
 
 void SendHex(unsigned char hex) 
