@@ -4,8 +4,6 @@ signed int steer=0;
 
 
 
-
-
 void main(void)
 {
 	initALL();
@@ -26,8 +24,9 @@ void main(void)
 			Dis_Num(64,3,(WORD)steer,5);
 			SET_steer(steer);
 		}
-		Flag=0;
 		//Senddata();
+		//LINFlex_TX((unsigned char)steer);
+		Flag=0;
 	}
 }
 
@@ -35,10 +34,12 @@ void main(void)
 void Pit0ISR()     
 {
 	Flag=1;
-	PIT.CH[0].TFLG.B.TIF = 1;
 	frequency_measure();
+	Get_speed();
 	if(wait>0)
 		wait--;
+	PIT.CH[0].TFLG.B.TIF = 1;
+
 }
 
 

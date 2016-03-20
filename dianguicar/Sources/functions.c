@@ -18,11 +18,12 @@ float fre_diff,dis,LEFT,LEFT_old,LEFT_new=0,RIGHT,RIGHT_old,RIGHT_new=0,MIDDLE,M
 float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
-unsigned int count1,count2,currentspeed;
+unsigned  int count1,count2;
+int currentspeed;
 float  	kp1=15.5,ki=0,kd1=4,// 分段PID
 		kp2=10,ki2=0,kd2=2.5,  
 		kp3=6.5,ki3=0,kd3=1,
-		kp4=2.5,ki4=0,kd4=00.5;    
+		kp4=2.5,ki4=0,kd4=0.5;    
 float kp,ki,kd;
 int temp_fre[2];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
@@ -324,8 +325,8 @@ void sensor_display(void)
 	Dis_Num(64,0,(WORD)LEFT,5);
 	Dis_Num(64,1,(WORD)MIDDLE,5);
 	Dis_Num(64,2,(WORD)RIGHT,5);
-/*	Dis_Num(64,4,(WORD)fre_diff,5);
-	Dis_Num(64,5,(WORD)(-fre_diff),5);*/
+	Dis_Num(64,4,currentspeed,5);
+	/*	Dis_Num(64,5,(WORD)(-fre_diff),5);*/
 
 }
 
@@ -337,15 +338,16 @@ void sensor_display(void)
 * 修改人  ：温泉
 * 修改时间：2016/02/23
 *****************************************************************************************************************/
-void SAIC1_inter(void) 
+/*void SAIC1_inter(void) 
 {
 
     if(  EMIOS_0.CH[3].CSR.B.FLAG  == 1)
 	{
 		count1++;
 		EMIOS_0.CH[3].CSR.B.FLAG=1;    //清除标志位
+		EMIOS_0.CH[2].CSR.B.FLAG=1;
 	}
-}
+}*/
 /****************************************************************************************************************
 * 函数名称：SAIC2_inter()	
 * 函数功能：光编输入脉冲捕捉
@@ -375,12 +377,19 @@ void SAIC1_inter(void)
 *****************************************************************************************************************/
 void Get_speed()  //定时2mse采速度
 {
-	if(forward)
-		currentspeed=count1;
+	count1=(WORD)EMIOS_0.CH[3].CCNTR.R;
+	if (count1 >= count2)
+		{
+			currentspeed = count1 - count2;
+		}
 	else
-		currentspeed=-count1;
-	count1=0;
-	PIT.CH[1].TFLG.B.TIF=1;
+		{
+			currentspeed = 0xffff - (-count1 + count2);
+		}
+	if(forward)
+		currentspeed=-currentspeed;
+	count2=count1;
+	//PIT.CH[1].TFLG.B.TIF=1;*/
 }
 /****************************************************************************************************************
 * 函数名称：speed_set( )	
