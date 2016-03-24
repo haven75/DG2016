@@ -19,8 +19,8 @@ void main(void)
 			steer=STEER_HELM_CENTER+LocPIDCal();
 			if(steer<522)
 				steer=522;
-			if(steer>855)
-				steer=855;
+			if(steer>858)
+				steer=858;
 			Dis_Num(64,3,(WORD)steer,5);
 			SET_steer(steer);
 		}

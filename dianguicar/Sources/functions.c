@@ -21,9 +21,9 @@ unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned  int count1,count2;
 int currentspeed;
 float  	kp1=15.5,ki=0,kd1=4,// 分段PID
-		kp2=10,ki2=0,kd2=2.5,  
-		kp3=6.5,ki3=0,kd3=1,
-		kp4=2.5,ki4=0,kd4=0.5;    
+		kp2=11.7,ki2=0,kd2=2.8,  
+		kp3=6.5,ki3=0,kd3=1.3,
+		kp4=3,ki4=0,kd4=0.8;    
 float kp,ki,kd;
 int temp_fre[2];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
@@ -207,9 +207,9 @@ signed int LocPIDCal(void)
 	{
 		middleflag++;
 		if(flag==1)
-			return(165);
+			return(168);
 		if(flag==2)
-			return(-165);
+			return(-168);
 	}
 		
 	else
@@ -222,12 +222,12 @@ signed int LocPIDCal(void)
 				if(fre_diff>=0)
 				{
 					flag=1;
-					return(165);
+					return(168);
 				}
 				else
 				{
 					flag=2;
-					return(-165);
+					return(-168);
 				}
 			}
 			
@@ -302,7 +302,7 @@ signed int LocPIDCal(void)
 		}
 		
 		temp_steer=kp*iError+kd*dError;
-		if(temp_steer>=165)
+		if(temp_steer>=168)
 			flag=1;               //左打死
 		else if(temp_steer<=-168)
 			flag=2;
@@ -325,7 +325,7 @@ void sensor_display(void)
 	Dis_Num(64,0,(WORD)LEFT,5);
 	Dis_Num(64,1,(WORD)MIDDLE,5);
 	Dis_Num(64,2,(WORD)RIGHT,5);
-	Dis_Num(64,4,currentspeed,5);
+	Dis_Num(64,4,(WORD)currentspeed,5);
 	/*	Dis_Num(64,5,(WORD)(-fre_diff),5);*/
 
 }
