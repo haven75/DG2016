@@ -20,10 +20,10 @@ float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned  int count1,count2;
 int currentspeed;
-float  	kp1=15.5,ki=0,kd1=4,// 分段PID
-		kp2=11.7,ki2=0,kd2=2.8,  
-		kp3=6.5,ki3=0,kd3=1.3,
-		kp4=3,ki4=0,kd4=0.8;    
+float  	kp1=15,ki=0,kd1=4,// 分段PID
+		kp2=11.5,ki2=0,kd2=2.5,  
+		kp3=5.8,ki3=0,kd3=1.4,
+		kp4=2.5,ki4=0,kd4=0.4;    
 float kp,ki,kd;
 int temp_fre[2];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
@@ -137,7 +137,7 @@ void GETservoPID(void)
 		;
 	else if(left==1)
 	{
-		if(LEFT<=567&&RIGHT>=575)
+		if(LEFT<=572&&RIGHT>=578)
 		{
 			//se->Proportion=kp1;  传递不了值
 			//se->Derivative=kd1;
@@ -157,7 +157,7 @@ void GETservoPID(void)
 	}
 	else if(right==1)
 	{
-		if(LEFT>=567&&RIGHT<=75)
+		if(LEFT>=572&&RIGHT<=578)
 		{
 			//se->Proportion=kp1;
 			//se->Derivative=kd1;
@@ -207,9 +207,9 @@ signed int LocPIDCal(void)
 	{
 		middleflag++;
 		if(flag==1)
-			return(168);
+			return(171);
 		if(flag==2)
-			return(-168);
+			return(-172);
 	}
 		
 	else
@@ -222,17 +222,17 @@ signed int LocPIDCal(void)
 				if(fre_diff>=0)
 				{
 					flag=1;
-					return(168);
+					return(171);
 				}
 				else
 				{
 					flag=2;
-					return(-168);
+					return(-172);
 				}
 			}
 			
 			if(fre_diff>=0) 
-				fre_diff=19-fre_diff;
+				fre_diff=20-fre_diff;
 			else if(fre_diff>=-11)
 				fre_diff=-21-fre_diff;
 		
@@ -302,9 +302,9 @@ signed int LocPIDCal(void)
 		}
 		
 		temp_steer=kp*iError+kd*dError;
-		if(temp_steer>=168)
+		if(temp_steer>=171)
 			flag=1;               //左打死
-		else if(temp_steer<=-168)
+		else if(temp_steer<=-172)
 			flag=2;
 		else 
 			flag=0;
