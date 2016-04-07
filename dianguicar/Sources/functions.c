@@ -21,8 +21,8 @@ unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned  int count1,count2;
 int currentspeed;
 float  	kp1=15,ki=0,kd1=4,// 分段PID
-		kp2=11.5,ki2=0,kd2=2.5,  
-		kp3=5.8,ki3=0,kd3=1.4,
+		kp2=12,ki2=0,kd2=3.1,  
+		kp3=6,ki3=0,kd3=1.5,
 		kp4=2.5,ki4=0,kd4=0.4;    
 float kp,ki,kd;
 int temp_fre[2];
@@ -209,7 +209,7 @@ signed int LocPIDCal(void)
 		if(flag==1)
 			return(171);
 		if(flag==2)
-			return(-172);
+			return(-178);
 	}
 		
 	else
@@ -227,7 +227,7 @@ signed int LocPIDCal(void)
 				else
 				{
 					flag=2;
-					return(-172);
+					return(-178);
 				}
 			}
 			
@@ -304,7 +304,7 @@ signed int LocPIDCal(void)
 		temp_steer=kp*iError+kd*dError;
 		if(temp_steer>=171)
 			flag=1;               //左打死
-		else if(temp_steer<=-172)
+		else if(temp_steer<=-178)
 			flag=2;
 		else 
 			flag=0;

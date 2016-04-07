@@ -162,14 +162,14 @@ void initPIT(void)
   PIT.CH[0].LDVAL.R = 128000;        //PIT0 timeout=160000 sysclks x 1sec/80M sysclks =2msec
   PIT.CH[0].TCTRL.R = 0X00000003;    //Enable PIT0 interrupt and make PIT active to count 
   
-  PIT.CH[1].LDVAL.R = 64000;      // PIT1 timeout = 64000 sysclks x 1sec/64M sysclks = 1msec 
+  PIT.CH[1].LDVAL.R = 600000;      // PIT1 timeout = 64000 sysclks x 1sec/64M sysclks = 1msec 
   PIT.CH[1].TCTRL.R = 0x00000003; // Enable PIT1 interrupt and make PIT active to count 
   
  // PIT.CH[2].LDVAL.R =320000000;    //设置计数值为32000000
  // PIT.CH[2].TCTRL.R = 0x000000003; //使能PIT2计数，并使能中断
   
   INTC_InstallINTCInterruptHandler(Pit0ISR,59,1); 
- // INTC_InstallINTCInterruptHandler(Get_speed,60,2);
+ // INTC_InstallINTCInterruptHandler(Pit1ISR,60,2);
 }
 
 

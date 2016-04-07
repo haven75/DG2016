@@ -7,7 +7,7 @@ signed int steer=0;
 void main(void)
 {
 	initALL();
-	while(wait>0);
+	while(wait);
 	Set_Middlepoint();
 	for (;;) 
 	{
@@ -17,14 +17,14 @@ void main(void)
 			position();
 			GETservoPID();
 			steer=STEER_HELM_CENTER+LocPIDCal();
-			if(steer<508)
-				steer=505;
+			if(steer<509)
+				steer=503;
 			if(steer>850)
 				steer=851;
 			Dis_Num(64,3,(WORD)steer,5);
 			SET_steer(steer);
 		}
-		//Senddata();
+		
 		//LINFlex_TX((unsigned char)steer);
 		Flag=0;
 	}
@@ -41,5 +41,6 @@ void Pit0ISR()
 	PIT.CH[0].TFLG.B.TIF = 1;
 
 }
+
 
 
