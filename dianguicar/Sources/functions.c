@@ -20,10 +20,10 @@ float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned  int count1,count2;
 int currentspeed;
-float  	kp1=15,ki=0,kd1=4,// 分段PID
-		kp2=12,ki2=0,kd2=3.1,  
-		kp3=6,ki3=0,kd3=1.5,
-		kp4=2.5,ki4=0,kd4=0.4;    
+float  	kp1=15.5,ki=0,kd1=4.1,// 分段PID
+		kp2=13.2,ki2=0,kd2=3.5,  
+		kp3=6.2,ki3=0,kd3=1.7,
+		kp4=2.5,ki4=0,kd4=0.6;    
 float kp,ki,kd;
 int temp_fre[2];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
@@ -217,7 +217,7 @@ signed int LocPIDCal(void)
 		if(MIDDLE<=Msetpoint)      //中间线圈判定频率偏差大小
 		{
 			middleflag++;
-			if(middleflag>=28)           //u形弯处理  middleflag计数
+			if(middleflag>=5)           //u形弯处理  middleflag计数
 			{
 				if(fre_diff>=0)
 				{
@@ -400,16 +400,18 @@ void Get_speed()  //定时2mse采速度
 *****************************************************************************************************************/
 void speed_set()
 {
+	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))     //判定不严谨
+			Set_speed=Biground;
 	if(fre_diff>-2&&fre_diff<2)
 		Set_speed=Strait;
 	if(fre_diff>=-5&&fre_diff<=5)
 		Set_speed=Littleround;
 	if(fre_diff>=-7&&fre_diff<=7)
 		Set_speed=LittleSround;
-	if(middleflag>28)
+	if(middleflag>5)
 		Set_speed=Uround;
-	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))     //判定不严谨
-		Set_speed=Biground;
+	SET_motor(Set_speed);
+	
 }
 /****************************************************************************************************************
 * 函数名称：speed_control( )	

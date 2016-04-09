@@ -23,6 +23,7 @@ void main(void)
 				steer=851;
 			Dis_Num(64,3,(WORD)steer,5);
 			SET_steer(steer);
+			//speed_set();
 		}
 		
 		//LINFlex_TX((unsigned char)steer);
