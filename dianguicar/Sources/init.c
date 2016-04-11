@@ -133,9 +133,9 @@ void SET_motor(signed int speed)
 	}
 }
 /*************************舵机接口函数***********************/
-void SET_steer(signed int steer)
+void SET_steer(signed int Steer)
 {
-	EMIOS_0.CH[2].CBDR.R = steer;
+	EMIOS_0.CH[2].CBDR.R = Steer;
 }
 
 

@@ -20,11 +20,11 @@ float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned  int count1,count2;
 int currentspeed;
-float  	kp0=16,ki=0,kd0=4,// 分段PID
-		kp1=13.2,ki1=0,kd1=3.6, 
-		kp2=9.2,ki2=0,kd2=2.2, 
-		kp3=6.2,ki3=0,kd3=1.7,
-		kp4=2.5,ki4=0,kd4=0.6;    
+float  	kp0=16.3,kd0=4.2,// 分段PID
+		kp1=13,kd1=3.5, 
+		kp2=9,kd2=2.2, 
+		kp3=5.8,kd3=1.5,
+		kp4=2.5,kd4=0.6;    
 float kp,ki,kd;
 int temp_fre[2];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
@@ -227,9 +227,13 @@ signed int LocPIDCal(void)
 	{
 		if(MIDDLE<=Msetpoint/*||temp_steer<570||temp_steer>792*/)      //中间线圈判定频率偏差大小
 		{
-			middleflag++;
-			if(middleflag>=2)           //u形弯处理  middleflag计数
-			{
+			if(fre_diff>=0) 
+				fre_diff=20-fre_diff;
+			else
+				fre_diff=-21-fre_diff;
+	//		middleflag++;
+	//		if(middleflag>=2)           //u形弯处理  middleflag计数
+	//		{
 				if(fre_diff>=0)
 				{
 					flag=1;
@@ -240,14 +244,11 @@ signed int LocPIDCal(void)
 					flag=2;
 					return(-178);
 				}
-			}
+			} 
 			
-			if(fre_diff>=0) 
-				fre_diff=20-fre_diff;
-			else
-				fre_diff=-21-fre_diff;
+
 		
-		}   
+	//	}   
 		else
 			middleflag=0;	
 	
@@ -271,6 +272,7 @@ signed int LocPIDCal(void)
 			flag=0;
 			kp=kp4;
 			kd=kd4;
+			Set_speed=Strait;
 		}
 		else if(fre_diff>=-4&&fre_diff<=4)                                //小弯
 		{
@@ -283,7 +285,8 @@ signed int LocPIDCal(void)
 			{
 				kp=kp4+(kp3-kp4)/2*(-fre_diff-2);
 				kd=kd3;
-			}					
+			}				
+			Set_speed=Littleround;
 		}
 		else if(fre_diff>=-6&&fre_diff<=6)                                //小弯
 		{
@@ -296,7 +299,8 @@ signed int LocPIDCal(void)
 			{
 				kp=kp3+(kp2-kp3)/2*(-fre_diff-4);
 				kd=kd2;
-			}					
+			}	
+			Set_speed=LittleSround;
 		}
 		else if(fre_diff>=-8&&fre_diff<=8)                                //小弯
 		{
@@ -310,6 +314,7 @@ signed int LocPIDCal(void)
 				kp=kp2+(kp1-kp2)/2*(-fre_diff-6);
 				kd=kd1;
 			}					
+			Set_speed=Biground;
 		}
 		else                    //大弯
 		{
@@ -322,8 +327,10 @@ signed int LocPIDCal(void)
 			{
 				kp=kp1+(kp0-kp1)/5*(-fre_diff-8);
 				kd=kd0;
-			}								
+			}					
+			Set_speed=88;
 		}
+		SET_motor(Set_speed);
 	/*	else if(fre_diff>=-8&&fre_diff<=8)                                //小弯
 		{
 			if(fre_diff>=0)
@@ -449,16 +456,17 @@ void Get_speed()  //定时2mse采速度
 *****************************************************************************************************************/
 void speed_set()
 {
-	if(fre_diff>-2&&fre_diff<2)
-		Set_speed=Strait;
-	if(fre_diff>=-5&&fre_diff<=5)
-		Set_speed=Littleround;
-	if(fre_diff>=-7&&fre_diff<=7)
-		Set_speed=LittleSround;
-	if(middleflag>28)
-		Set_speed=Uround;
-	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))     //判定不严谨
+	//if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))     //判定不严谨
+	if(temp_steer<=-178||temp_steer>=171)
 		Set_speed=Biground;
+	else if(fre_diff>-2&&fre_diff<2)
+		Set_speed=Strait;
+	else if(fre_diff>=-5&&fre_diff<=5)
+		Set_speed=Littleround;
+	else if(fre_diff>=-7&&fre_diff<=7)
+		Set_speed=LittleSround;
+	SET_motor(Set_speed);
+
 }
 /****************************************************************************************************************
 * 函数名称：speed_control( )	

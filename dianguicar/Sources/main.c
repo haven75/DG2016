@@ -4,6 +4,7 @@ signed int steer=0;
 
 
 
+
 void main(void)
 {
 	initALL();
@@ -23,6 +24,7 @@ void main(void)
 				steer=851;
 			Dis_Num(64,3,(WORD)steer,5);
 			SET_steer(steer);
+			//speed_set();
 		}
 		//Senddata();
 		//LINFlex_TX((unsigned char)steer);
