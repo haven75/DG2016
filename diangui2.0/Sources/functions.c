@@ -20,14 +20,13 @@ float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned  int count1,count2;
 int currentspeed;
-float  	kp0=16,kd0=4.2,// 分段PID
-		kp1=13,kd1=3.7, 
-		kp2=8.7,kd2=2.2, 
-		kp3=5.5,kd3=1.5,
-		kp4=2.5,kd4=0.6;    
+float  	kp1=2.5,ki=0,kd1=4,// 分段PID
+		kp2=2.3,ki2=0,kd2=2.8,  
+		kp3=2.2,ki3=0,kd3=1.2,
+		kp4=2.1,ki4=0,kd4=0.4;    
 float kp,ki,kd;
 int temp_fre[2];
-float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
+float error,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
 int Set_speed,temp_speed;
 float speed_kp,speed_ki,speed_kd,speed_iError,speed_lastError,speed_prevError;
 
@@ -158,7 +157,7 @@ void GETservoPID(void)
 	}
 	else if(right==1)
 	{
-		if(LEFT>=567&&RIGHT<=75)
+		if(LEFT>=567&&RIGHT<=575)
 		{
 			//se->Proportion=kp1;
 			//se->Derivative=kd1;
@@ -203,171 +202,91 @@ signed int LocPIDCal(void)
 //	if((LEFT>=start_left+8)&&(RIGHT>=start_right+8))  // 过十字
 	//	return(0);
 //	if(((flag==1)&&(LEFT<572))||((flag==2)&&(RIGHT<580)))
-	
-	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint)) //左右打死保持
-	{
-		middleflag++;
-		if(flag==1)
-			return(171);
-		if(flag==2)
-			return(-178);
-	}
-	/*else if(fre_diff>=11)
-	{
-		flag=1;
-		return(170);
-	}
-	else if(fre_diff<=-10)
-	{
-		flag=2;
-		return(-172);
-	}*/
-	
-	else
-	{
-		if(MIDDLE<=Msetpoint/*||temp_steer<570||temp_steer>792*/)      //中间线圈判定频率偏差大小
+	if(MIDDLE<Msetpoint&&(flag==1||flag==2))
 		{
-			if(fre_diff>=0) 
-				fre_diff=20-fre_diff;
-			else
-				fre_diff=-21-fre_diff;
-	//		middleflag++;
-	//		if(middleflag>=2)           //u形弯处理  middleflag计数
-	//		{
-				if(fre_diff>=0)
-				{
-					flag=1;
-					return(171);
-				}
-				else
-				{
-					flag=2;
-					return(-178);
-				}
-			} 
-			
-
-		
-	//	}   
+			if(flag==1)
+			{
+				return(169);
+			}
+			else if(flag==2)
+			{
+				return(-169);
+			}
+		}
+	if(fre_diff<0)
+		fre_diff=1.2*fre_diff;
+	error=fre_diff;
+	if(MIDDLE<Msetpoint)
+	{
+		if(fre_diff>0)
+			fre_diff=84-fre_diff;
 		else
-			middleflag=0;	
-	
-		/*if(fre_diff>=0)
-			fre_diff+=1;*/
-		
-		
-		iError=fre_diff; 
-		sumerror+=iError;
-		dError=iError-lasterror;
-		lasterror=iError;
-		
-		/*iError=se->SetPoint-Nextpoint; 
-		se->SumError+=iError;
-		dError=iError-se->LastError;
-		se->LastError=iError;*/
-			
-		
-		if(fre_diff>=-2&&fre_diff<=2)      //直道
-		{
-			flag=0;
-			kp=kp4;
-			kd=kd4;
-			Set_speed=Strait;
-		}
-		else if(fre_diff>=-4&&fre_diff<=4)                                //小弯
-		{
-			if(fre_diff>=0)
-			{
-				kp=kp4+(kp3-kp4)/2*(fre_diff-2);
-				kd=kd3;
-			}
-			else
-			{
-				kp=kp4+(kp3-kp4)/2*(-fre_diff-2);
-				kd=kd3;
-			}				
-			Set_speed=Littleround;
-		}
-		else if(fre_diff>=-6&&fre_diff<=6)                                //小弯
-		{
-			if(fre_diff>=0)
-			{
-				kp=kp3+(kp2-kp3)/2*(fre_diff-4);
-				kd=kd2;
-			}
-			else
-			{
-				kp=kp3+(kp2-kp3)/2*(-fre_diff-4);
-				kd=kd2;
-			}	
-			Set_speed=LittleSround;
-		}
-		else if(fre_diff>=-8&&fre_diff<=8)                                //小弯
-		{
-			if(fre_diff>=0)
-			{
-				kp=kp2+(kp1-kp2)/2*(fre_diff-6);
-				kd=kd1;
-			}
-			else
-			{
-				kp=kp2+(kp1-kp2)/2*(-fre_diff-6);
-				kd=kd1;
-			}					
-			Set_speed=Biground;
-		}
-		else                    //大弯
-		{
-			if(fre_diff>=0)
-			{
-				kp=kp1+(kp0-kp1)/5*(fre_diff-8);
-				kd=kd0;
-			}
-			else
-			{
-				kp=kp1+(kp0-kp1)/5*(-fre_diff-8);
-				kd=kd0;
-			}					
-			Set_speed=dasi;
-		}
-		SET_motor(Set_speed);
-	/*	else if(fre_diff>=-8&&fre_diff<=8)                                //小弯
-		{
-			if(fre_diff>=0)
-			{
-				kp=kp3+(kp2-kp3)/4*(fre_diff-4);
-				kd=kd2;
-			}
-			else
-			{
-				kp=kp3+(kp2-kp3)/4*(-fre_diff-4);
-				kd=kd2;
-			}					
-		}
-		else                    //大弯
-		{
-			if(fre_diff>=0)
-			{
-				kp=kp2+(kp1-kp2)/8*(fre_diff-8);
-				kd=kd3;
-			}
-			else
-			{
-				kp=kp2+(kp1-kp2)/8*(-fre_diff-8);
-				kd=kd3;
-			}								
-		}*/
-		
-		temp_steer=kp*iError+kd*dError;
-		if(temp_steer>=171)
-			flag=1;               //左打死
-		else if(temp_steer<=-178)
-			flag=2;
-		else 
-			flag=0;
-		return(temp_steer);
+			fre_diff=-(fre_diff+80);
 	}
 
+	
+	if(fre_diff<20&&fre_diff>-20)
+	{
+		flag=0;
+		kp=kp4;
+		kd=kd4;
+	}
+	else if(fre_diff<40&&fre_diff>-40)
+	{
+		if(fre_diff>=0)
+		{
+			kp=kp4+(kp3-kp4)/20*(fre_diff-20);
+			kd=kd3;
+		}
+		else
+		{
+			kp=kp4+(kp3-kp4)/20*(-fre_diff-20);
+			kd=kd3;
+		}	
+	}
+	else if(fre_diff>=-60&&fre_diff<60)                                //小弯
+	{
+		if(fre_diff>=0)
+		{
+			kp=kp3+(kp2-kp3)/20*(fre_diff-40);
+			kd=kd2;
+		}
+		else
+		{
+			kp=kp3+(kp2-kp3)/20*(-fre_diff-40);
+			kd=kd2;
+		}					
+	}
+	else                    //大弯
+	{
+		if(fre_diff>=0)
+		{
+			kp=kp2+(kp1-kp2)/20*(fre_diff-60);
+			kd=kd3;
+		}
+		else
+		{
+			kp=kp2+(kp1-kp2)/20*(-fre_diff-60);
+			kd=kd3;
+		}								
+	}
+
+	iError=fre_diff; 
+	dError=iError-lasterror;
+	lasterror=iError;
+	
+	temp_steer=kp*iError+kd*dError;
+	if(temp_steer>156)
+		flag=1;
+	else if(temp_steer<-169)
+		flag=2;
+	else
+		flag=0;	
+
+	
+
+	
+	return(temp_steer);
 }
 /****************************************************************************************************************
 * 函数名称：sensor_display()	
@@ -383,7 +302,8 @@ void sensor_display(void)
 	Dis_Num(64,1,(WORD)MIDDLE,5);
 	Dis_Num(64,2,(WORD)RIGHT,5);
 	Dis_Num(64,4,(WORD)currentspeed,5);
-	
+	Dis_Num(64,5,(WORD)flag,5);
+
 }
 
 /****************************************************************************************************************
@@ -456,14 +376,13 @@ void Get_speed()  //定时2mse采速度
 *****************************************************************************************************************/
 void speed_set()
 {
-	//if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))     //判定不严谨
-	if(temp_steer<=-178||temp_steer>=171)
+	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))     //判定不严谨
 		Set_speed=Biground;
-	else if(fre_diff>-2&&fre_diff<2)
+	if(fre_diff>-2&&fre_diff<2)
 		Set_speed=Strait;
-	else if(fre_diff>=-5&&fre_diff<=5)
+	if(fre_diff>=-5&&fre_diff<=5)
 		Set_speed=Littleround;
-	else if(fre_diff>=-7&&fre_diff<=7)
+	if(fre_diff>=-7&&fre_diff<=7)
 		Set_speed=LittleSround;
 	SET_motor(Set_speed);
 
@@ -495,12 +414,12 @@ void speed_control()
 *****************************************************************************************************************/
 void Set_Middlepoint()
 {
-	temp_middle=MIDDLE-11;
+	temp_middle=MIDDLE+12;
 	start_left=LEFT-14;
 	start_right=RIGHT-14;
 	sensor_compensator=RIGHT-LEFT;
 	Msetpoint=temp_middle;
-	Dis_Num(64,7,(WORD)Msetpoint,5);
+	Dis_Num(64,6,(WORD)Msetpoint,5);
 }
 
 

@@ -12,12 +12,11 @@ typedef unsigned short WORD;
 typedef unsigned char byte;
 
 /****************************************************************set_speed***********************************************/
-#define Strait 90
-#define Littleround 88
-#define LittleSround 87
-#define Biground 86
-#define Uround 80
-#define dasi 86
+#define Strait 150
+#define Littleround 100
+#define LittleSround 120
+#define Biground 130
+#define Uround 70
 
 
 typedef struct PID

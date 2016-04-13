@@ -4,9 +4,8 @@ signed int steer=0;
 
 
 
-
 void main(void)
-{
+  {
 	initALL();
 	while(wait>0);
 	Set_Middlepoint();
@@ -16,15 +15,14 @@ void main(void)
 		{
 			sensor_display();
 			position();
-			GETservoPID();
+			//GETservoPID();
 			steer=STEER_HELM_CENTER+LocPIDCal();
-			if(steer<503)
-				steer=498;
-			if(steer>850)
-				steer=859;
+			if(steer<700)
+				steer=692;
+			if(steer>1020)
+				steer=1025;
 			Dis_Num(64,3,(WORD)steer,5);
 			SET_steer(steer);
-			//speed_set();
 		}
 		//Senddata();
 		//LINFlex_TX((unsigned char)steer);
