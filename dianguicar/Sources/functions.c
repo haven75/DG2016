@@ -19,10 +19,10 @@ float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned int count1,count2,currentspeed;
-float  	kp1=15.5,ki=0,kd1=4,// 分段PID
-		kp2=10,ki2=0,kd2=2.5,  
-		kp3=6.5,ki3=0,kd3=1,
-		kp4=2.5,ki4=0,kd4=00.5;    
+float  	kp1=16,ki=0,kd1=4,// 分段PID
+		kp2=10,ki2=0,kd2=2.7,  
+		kp3=6.5,ki3=0,kd3=1.5,
+		kp4=2.5,ki4=0,kd4=0.6;    
 float kp,ki,kd;
 int temp_fre[2];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
@@ -206,9 +206,9 @@ signed int LocPIDCal(void)
 	{
 		middleflag++;
 		if(flag==1)
-			return(165);
+			return(171);
 		if(flag==2)
-			return(-165);
+			return(-178);
 	}
 		
 	else
@@ -216,23 +216,23 @@ signed int LocPIDCal(void)
 		if(MIDDLE<=Msetpoint)      //中间线圈判定频率偏差大小
 		{
 			middleflag++;
-			if(middleflag>=28)           //u形弯处理  middleflag计数
-			{
+//			if(middleflag>=2)           //u形弯处理  middleflag计数
+//			{
 				if(fre_diff>=0)
 				{
 					flag=1;
-					return(165);
+					return(171);
 				}
 				else
 				{
 					flag=2;
-					return(-165);
+					return(-178);
 				}
-			}
+//			}
 			
 			if(fre_diff>=0) 
-				fre_diff=19-fre_diff;
-			else if(fre_diff>=-11)
+				fre_diff=20-fre_diff;
+			else
 				fre_diff=-21-fre_diff;
 		
 		}   
@@ -301,9 +301,9 @@ signed int LocPIDCal(void)
 		}
 		
 		temp_steer=kp*iError+kd*dError;
-		if(temp_steer>=165)
+		if(temp_steer>=171)
 			flag=1;               //左打死
-		else if(temp_steer<=-168)
+		else if(temp_steer<=-178)
 			flag=2;
 		else 
 			flag=0;
