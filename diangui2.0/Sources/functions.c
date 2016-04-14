@@ -20,11 +20,11 @@ float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned  int count1,count2;
 int currentspeed;
-float  	kp0=6,ki0=0,kd0=0.6,
-		kp1=5,ki=0,kd1=0.6,// 分段PID
-		kp2=3.5,ki2=0,kd2=0.5,  
-		kp3=2,ki3=0,kd3=0.45,
-		kp4=1,ki4=0,kd4=0.35;    
+float  	kp0=6.2,ki0=0,kd0=1.5,
+		kp1=5,ki=0,kd1=1.2,// 分段PID
+		kp2=3.5,ki2=0,kd2=0.7,  
+		kp3=2.2,ki3=0,kd3=0.45,
+		kp4=1,ki4=0,kd4=0.25;    
 float kp,ki,kd;
 int temp_fre[2];
 float error,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
