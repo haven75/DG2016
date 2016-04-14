@@ -20,10 +20,11 @@ float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned  int count1,count2;
 int currentspeed;
-float  	kp1=2.5,ki=0,kd1=0.6,// 分段PID
-		kp2=1.8,ki2=0,kd2=0.5,  
-		kp3=1.6,ki3=0,kd3=0.45,
-		kp4=1.4,ki4=0,kd4=0.35;    
+float  	kp0=6,ki0=0,kd0=0.6,
+		kp1=5,ki=0,kd1=0.6,// 分段PID
+		kp2=3.5,ki2=0,kd2=0.5,  
+		kp3=2,ki3=0,kd3=0.45,
+		kp4=1,ki4=0,kd4=0.35;    
 float kp,ki,kd;
 int temp_fre[2];
 float error,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
@@ -202,7 +203,13 @@ signed int LocPIDCal(void)
 //	if((LEFT>=start_left+8)&&(RIGHT>=start_right+8))  // 过十字
 	//	return(0);
 //	if(((flag==1)&&(LEFT<572))||((flag==2)&&(RIGHT<580)))
-	
+	if(MIDDLE<Msetpoint&&(flag==1||flag==2))
+	{
+		if(flag==1)
+			return(170);
+		else if(flag==2)
+			return(-170);
+	}
 	
 	error=fre_diff;
 	if(MIDDLE<Msetpoint)
@@ -215,56 +222,69 @@ signed int LocPIDCal(void)
 		else
 			fre_diff=-(fre_diff+80);
 	}
-	if(fre_diff>0)
-		fre_diff=1.2*fre_diff;
+//	if(fre_diff>0)
+//		fre_diff=1.1*fre_diff;
 	
-	if(fre_diff<10&&fre_diff>-10)
+	if(fre_diff<5&&fre_diff>-5)
 	{
 		flag=0;
 		kp=kp4;
 		kd=kd4;
 	}
-	else if(fre_diff<25&&fre_diff>-25)
+	else if(fre_diff<10&&fre_diff>-10)
 	{
 		if(fre_diff>=0)
 		{
-			kp=kp4+(kp3-kp4)/15*(fre_diff-10);
+			kp=kp4+(kp3-kp4)/5*(fre_diff-5);
 			kd=kd3;
 		}
 		else
 		{
-			kp=kp4+(kp3-kp4)/15*(-fre_diff-10);
+			kp=kp4+(kp3-kp4)/5*(-fre_diff-5);
 			kd=kd3;
 		}	
 	}
-	else if(fre_diff>=-45&&fre_diff<45)                                //小弯
+	else if(fre_diff>=-15&&fre_diff<15)                                //小弯
 	{
 		if(fre_diff>=0)
 		{
-			kp=kp3+(kp2-kp3)/15*(fre_diff-20);
+			kp=kp3+(kp2-kp3)/5*(fre_diff-10);
 			kd=kd2;
 		}
 		else
 		{
-			kp=kp3+(kp2-kp3)/15*(-fre_diff-20);
+			kp=kp3+(kp2-kp3)/5*(-fre_diff-10);
 			kd=kd2;
 		}					
 	}
-	else                    //大弯
+	else if(fre_diff>=-20&&fre_diff<20)                //大弯
 	{
 		if(fre_diff>=0)
 		{
-			kp=kp2+(kp1-kp2)/20*(fre_diff-35);
-			kd=kd3;
+			kp=kp2+(kp1-kp2)/5*(fre_diff-15);
+			kd=kd1;
 		}
 		else
 		{
-			kp=kp2+(kp1-kp2)/20*(-fre_diff-35);
-			kd=kd3;
+			kp=kp2+(kp1-kp2)/5*(-fre_diff-15);
+			kd=kd1;
 		}								
 	}
+	else                                 //小弯
+		{
+			if(fre_diff>=0)
+			{
+				kp=kp1+(kp0-kp1)/10*(fre_diff-20);
+				kd=kd0;
+			}
+			else
+			{
+				kp=kp1+(kp0-kp1)/10*(-fre_diff-20);
+				kd=kd0;
+			}					
+		}
 	
-	if(MIDDLE<Msetpoint&&(error<4&&error>-4))
+	/*if(MIDDLE<Msetpoint&&(error<4&&error>-4))
 			{
 				if(flag==1)
 				{
@@ -275,15 +295,16 @@ signed int LocPIDCal(void)
 					return(-169);
 				}
 			}
+			*/
 
 	iError=fre_diff; 
 	dError=iError-lasterror;
 	lasterror=iError;
 	
 	temp_steer=kp*iError+kd*dError;
-	if(fre_diff>60)
+	if(temp_steer>160)
 		flag=1;
-	else if(fre_diff<-60)
+	else if(temp_steer<-160)
 		flag=2;
 	else
 		flag=0;	
@@ -422,7 +443,7 @@ void speed_control()
 *****************************************************************************************************************/
 void Set_Middlepoint()
 {
-	temp_middle=MIDDLE+10;
+	temp_middle=MIDDLE+11;
 	start_left=LEFT-14;
 	start_right=RIGHT-14;
 	sensor_compensator=RIGHT-LEFT;
