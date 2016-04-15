@@ -20,9 +20,9 @@ void main(void)
 			GETservoPID();
 			steer=STEER_HELM_CENTER+LocPIDCal();
 			if(steer<504)
-				steer=498;
+				steer=495;
 			if(steer>850)
-				steer=859;
+				steer=862;
 			Dis_Num(64,3,(WORD)steer,5);
 			SET_steer(steer);
 		}

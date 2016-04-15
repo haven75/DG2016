@@ -19,9 +19,10 @@ float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned int count1,count2,currentspeed;
-float  	kp1=16,ki=0,kd1=4,// 分段PID
-		kp2=10,ki2=0,kd2=2.7,  
-		kp3=6.5,ki3=0,kd3=1.5,
+float  	kp0=16,ki0=0,kd0=4,
+		kp1=11,ki=0,kd1=3,// 分段PID
+		kp2=8,ki2=0,kd2=2,  
+		kp3=6,ki3=0,kd3=1.5,
 		kp4=2.5,ki4=0,kd4=0.6;    
 float kp,ki,kd;
 int temp_fre[2];
@@ -204,7 +205,7 @@ signed int LocPIDCal(void)
 	
 	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint)) //左右打死保持
 	{
-		middleflag++;
+	//	middleflag++;
 		if(flag==1)
 			return(171);
 		if(flag==2)
@@ -215,7 +216,7 @@ signed int LocPIDCal(void)
 	{
 		if(MIDDLE<=Msetpoint)      //中间线圈判定频率偏差大小
 		{
-			middleflag++;
+	//		middleflag++;
 //			if(middleflag>=2)           //u形弯处理  middleflag计数
 //			{
 				if(fre_diff>=0)
@@ -236,8 +237,8 @@ signed int LocPIDCal(void)
 				fre_diff=-21-fre_diff;
 		
 		}   
-		else
-			middleflag=0;	
+//		else
+//			middleflag=0;	
 		
 		/*if(fre_diff>=0)
 			fre_diff+=1;*/
@@ -260,43 +261,56 @@ signed int LocPIDCal(void)
 			kp=kp4;
 			kd=kd4;
 		}
-		else if(fre_diff>=-5&&fre_diff<=5)                                //小弯
+		else if(fre_diff>=-4&&fre_diff<=4)                                //小弯
 		{
 			if(fre_diff>=0)
 			{
-				kp=kp4+(kp3-kp4)/3*(fre_diff-2);
+				kp=kp4+(kp3-kp4)/2*(fre_diff-2);
 				kd=kd3;
 			}
 			else
 			{
-				kp=kp4+(kp3-kp4)/3*(-fre_diff-2);
+				kp=kp4+(kp3-kp4)/2*(-fre_diff-2);
 				kd=kd3;
+			}					
+		}
+		else if(fre_diff>=-6&&fre_diff<=6)                                //小弯
+		{
+			if(fre_diff>=0)
+			{
+				kp=kp3+(kp2-kp3)/2*(fre_diff-4);
+				kd=kd2;
+			}
+			else
+			{
+				kp=kp3+(kp2-kp3)/2*(-fre_diff-4);
+				kd=kd2;
 			}					
 		}
 		else if(fre_diff>=-8&&fre_diff<=8)                                //小弯
 		{
 			if(fre_diff>=0)
 			{
-				kp=kp3+(kp2-kp3)/2*(fre_diff-5);
-				kd=kd2;
+				kp=kp2+(kp1-kp2)/2*(fre_diff-6);
+				kd=kd1;
 			}
 			else
 			{
-				kp=kp3+(kp2-kp3)/2*(-fre_diff-5);
-				kd=kd2;
+				kp=kp2+(kp1-kp2)/2*(-fre_diff-6);
+				kd=kd1;
 			}					
 		}
 		else                    //大弯
 		{
 			if(fre_diff>=0)
 			{
-				kp=kp2+(kp1-kp2)/13*(fre_diff-8);
-				kd=kd3;
+				kp=kp1+(kp0-kp1)/10*(fre_diff-8);
+				kd=kd0;
 			}
 			else
 			{
-				kp=kp2+(kp1-kp2)/13*(-fre_diff-8);
-				kd=kd3;
+				kp=kp1+(kp0-kp1)/10*(-fre_diff-8);
+				kd=kd0;
 			}								
 		}
 		
