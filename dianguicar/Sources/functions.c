@@ -20,11 +20,11 @@ float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned int count1,count2,currentspeed;
-float  	kp0=16.5,ki0=0,kd0=4.2,
-		kp1=12,ki=0,kd1=3.3,// 分段PID
-		kp2=7.8,ki2=0,kd2=2.15,  
-		kp3=5.7,ki3=0,kd3=1.4,
-		kp4=2.3,ki4=0,kd4=0.6;  
+float  	kp0=16.7,ki0=0,kd0=4.2,
+		kp1=12,ki=0,kd1=3.2,// 分段PID
+		kp2=7.8,ki2=0,kd2=2.3,  
+		kp3=5.7,ki3=0,kd3=1.6,
+		kp4=2.3,ki4=0,kd4=0.65; 
 float kp,ki,kd;
 int temp_fre[2];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
