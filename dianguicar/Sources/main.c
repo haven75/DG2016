@@ -28,6 +28,7 @@ void main(void)
 		}
 		Flag=0;
 		//Senddata();
+
 	}
 }
 
@@ -35,10 +36,11 @@ void main(void)
 void Pit0ISR()     
 {
 	Flag=1;
-	PIT.CH[0].TFLG.B.TIF = 1;
 	frequency_measure();
+	Get_speed();
 	if(wait>0)
 		wait--;
+	PIT.CH[0].TFLG.B.TIF = 1;
 }
 
 

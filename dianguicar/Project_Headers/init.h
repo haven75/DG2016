@@ -22,7 +22,7 @@ void Pit0ISR(void)  ;                     //PIT0 2msec中断控制controlflag
 void Pit1ISR(void);                       //PIT1 0.1msec中断读取AD
 void initKeys_Switchs(void);			    //按键+拨码开关
 void enableIrq(void);                    //开总中断
-void SAIC_INIT(void);                    //输入捕捉
+//void SAIC_INIT(void);                    //输入捕捉
 void initADC(void);
 void initALL(void);
 

@@ -24,7 +24,7 @@ void initALL(void)
 	initKeys_Switchs();
 	initPIT();
 	initADC();
-	SAIC_INIT();
+	//SAIC_INIT();
 	LCD_Init();
 	
 	enableIrq();
@@ -52,7 +52,7 @@ void initModesAndClock(void)
   
 	/* 开peri0、1、2 */
 	/* 外设时钟总线 可用于分频 */
-	CGM.SC_DC[0].R = 0x84;	/* LIN */
+	CGM.SC_DC[0].R = 0x80;	/* LIN */
 	CGM.SC_DC[1].R = 0x80;	/* FLEXCAN,DSPI */
     CGM.SC_DC[2].R = 0x80;	/* eMIOS,CTU,ADC */
 }
@@ -210,6 +210,17 @@ void initEMIOS_0ModulusCounter(void) //频率采集初始化
 		/* (WORD)EMIOS_0.CH[23].CCNTR.R 数据寄存器 */
 	SIU.PCR[71].R = 0x0500;	/* Initialize pad for eMIOS channel Initialize pad for input */
 	
+	/*计数部分 PE7 */
+	EMIOS_0.CH[3].CCR.B.MODE = 0x51;	/* Mode is MCB */
+	EMIOS_0.CH[3].CCR.B.BSL = 0x3;	/* Use internal counter */
+	EMIOS_0.CH[3].CCR.B.UCPRE=0;	/* Set channel prescaler to divide by 1 */
+	EMIOS_0.CH[3].CCR.B.UCPEN = 1;	/* Enable prescaler; uses default divide by 1 */
+	EMIOS_0.CH[3].CCR.B.FREN = 0;	/* Freeze channel counting when in debug mode */
+	EMIOS_0.CH[3].CCR.B.EDPOL=1;	/* Edge Select rising edge */
+	EMIOS_0.CH[3].CADR.R=0xffff;
+		/* (WORD)EMIOS_0.CH[23].CCNTR.R 数据寄存器 */
+	SIU.PCR[3].R = 0x0500;	/* Initialize pad for eMIOS channel Initialize pad for input */
+	
 }
 
 
@@ -243,19 +254,19 @@ void initLINFlex_0_UART (void)
 {
 	LINFLEX_0.LINCR1.B.INIT=1;  //进入初始化模式
 	LINFLEX_0.LINCR1.R=0x00000015; 
-	LINFLEX_0.LINIER.B.DRIE=1; //允许接收中断
+	LINFLEX_0.LINIER.B.DRIE=0; //允许接收中断
 	/*波特率算法baud=Fperiph_clk/(16*LFDIV)
 	DIV_M=LFDIV整数部分
 	DIV_F=LFDIV小数部分*16  */ 	
-	LINFLEX_0.LINIBRR.B.DIV_M= 86;  	//波特率设置38400:80M-130+3 57600:80M-86+13 115200:80M-43+6  9600:80M-520+83
-    LINFLEX_0.LINFBRR.B.DIV_F = 13;		//38400:64M-104+3
+	LINFLEX_0.LINIBRR.B.DIV_M= 69;  	//波特率设置38400:80M-130+3 57600:80M-86+13 115200:80M-43+6  9600:80M-520+83
+    LINFLEX_0.LINFBRR.B.DIV_F = 7;		//38400:64M-104+3
     LINFLEX_0.UARTCR.B.UART=1;
 	LINFLEX_0.UARTCR.R=0x00000033;//8-bit data、UART mode
 	LINFLEX_0.LINCR1.B.INIT=0; //退出初始化模式
 	
 	SIU.PCR[18].R = 0x0400;    /* MPC56xxB: Configure port B2 as LIN0TX */
     SIU.PCR[19].R = 0x0103;    /* MPC56xxB: Configure port B3 as LIN0RX */
-  	INTC_InstallINTCInterruptHandler(LINFlex_RX_Interrupt,79,4); 
+  	///INTC_InstallINTCInterruptHandler(LINFlex_RX_Interrupt,79,4); 
 }
 /*************************蓝牙接口函数*********************/
 void LINFlex_TX(unsigned char data)
@@ -295,7 +306,7 @@ void initKeys_Switchs(void)
 }
 
 
-void SAIC_INIT(void)
+/*void SAIC_INIT(void)
 {
 	EMIOS_0.CH[3].CCR.B.MODE  = 0x02;   //设置输入捕捉SAIC模式
 	EMIOS_0.CH[3].CCR.B.BSL   = 0x3;    //使用1MHz的内部计数器作为时钟源
@@ -310,7 +321,7 @@ void SAIC_INIT(void)
 	EMIOS_0.CH[3].CCR.B.FREN  = 1;      //在冻结模式下停止计数
 	
 	SIU.PCR[3].R = 0x0102; 
-	INTC_InstallINTCInterruptHandler(SAIC1_inter,142,1);
+	//INTC_InstallINTCInterruptHandler(SAIC1_inter,142,1);
 
 	/*EMIOS_0.CH[7].CCR.B.MODE  = 0x02;   //设置输入捕捉SAIC模式
 	EMIOS_0.CH[7].CCR.B.BSL   = 0x3;    //使用1MHz的内部计数器作为时钟源
@@ -325,5 +336,5 @@ void SAIC_INIT(void)
 	EMIOS_0.CH[7].CCR.B.FREN  = 1;      //在冻结模式下停止计数
 	
 	SIU.PCR[7].R = 0x0102; 
-	INTC_InstallINTCInterruptHandler(SAIC2_inter,144,1);*/
-}
+	INTC_InstallINTCInterruptHandler(SAIC2_inter,144,1);
+}*/

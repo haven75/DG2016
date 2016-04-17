@@ -14,21 +14,23 @@
  *      Author: Administrator
  */
 #include"includes.h"
-float fre_diff,dis,LEFT,LEFT_old,LEFT_new=0,RIGHT,RIGHT_old,RIGHT_new=0,MIDDLE,MIDDLE_old,MIDDLE_new=0,temp_steer;
+float fre_diff,dis,LEFT_old,LEFT_new=0,RIGHT_old,RIGHT_new=0,MIDDLE_old,MIDDLE_new=0,temp_steer;
+unsigned int LEFT,RIGHT,MIDDLE;
 float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
 unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
 unsigned int count1,count2,currentspeed;
-float  	kp0=16,ki0=0,kd0=4,
-		kp1=11,ki=0,kd1=3,// 分段PID
-		kp2=8,ki2=0,kd2=2,  
-		kp3=6,ki3=0,kd3=1.5,
-		kp4=2.5,ki4=0,kd4=0.6;    
+float  	kp0=16.5,ki0=0,kd0=4.2,
+		kp1=12,ki=0,kd1=3.3,// 分段PID
+		kp2=7.8,ki2=0,kd2=2.15,  
+		kp3=5.7,ki3=0,kd3=1.4,
+		kp4=2.3,ki4=0,kd4=0.6;  
 float kp,ki,kd;
 int temp_fre[2];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
 int Set_speed,temp_speed;
 float speed_kp,speed_ki,speed_kd,speed_iError,speed_lastError,speed_prevError;
+unsigned char Outdata[8];
 
 
 
@@ -207,9 +209,9 @@ signed int LocPIDCal(void)
 	{
 	//	middleflag++;
 		if(flag==1)
-			return(171);
+			return(181);
 		if(flag==2)
-			return(-178);
+			return(-186);
 	}
 		
 	else
@@ -222,12 +224,12 @@ signed int LocPIDCal(void)
 				if(fre_diff>=0)
 				{
 					flag=1;
-					return(171);
+					return(181);
 				}
 				else
 				{
 					flag=2;
-					return(-178);
+					return(-186);
 				}
 //			}
 			
@@ -315,9 +317,9 @@ signed int LocPIDCal(void)
 		}
 		
 		temp_steer=kp*iError+kd*dError;
-		if(temp_steer>=171)
+		if(temp_steer>=181)
 			flag=1;               //左打死
-		else if(temp_steer<=-178)
+		else if(temp_steer<=-186)
 			flag=2;
 		else 
 			flag=0;
@@ -338,8 +340,8 @@ void sensor_display(void)
 	Dis_Num(64,0,(WORD)LEFT,5);
 	Dis_Num(64,1,(WORD)MIDDLE,5);
 	Dis_Num(64,2,(WORD)RIGHT,5);
-/*	Dis_Num(64,4,(WORD)fre_diff,5);
-	Dis_Num(64,5,(WORD)(-fre_diff),5);*/
+	Dis_Num(64,4,(WORD)currentspeed,5);
+	//Dis_Num(64,5,(WORD)(-fre_diff),5);
 
 }
 
@@ -351,7 +353,7 @@ void sensor_display(void)
 * 修改人  ：温泉
 * 修改时间：2016/02/23
 *****************************************************************************************************************/
-void SAIC1_inter(void) 
+/*void SAIC1_inter(void) 
 {
 
     if(  EMIOS_0.CH[3].CSR.B.FLAG  == 1)
@@ -359,7 +361,7 @@ void SAIC1_inter(void)
 		count1++;
 		EMIOS_0.CH[3].CSR.B.FLAG=1;    //清除标志位
 	}
-}
+}*/
 /****************************************************************************************************************
 * 函数名称：SAIC2_inter()	
 * 函数功能：光编输入脉冲捕捉
@@ -389,12 +391,19 @@ void SAIC1_inter(void)
 *****************************************************************************************************************/
 void Get_speed()  //定时2mse采速度
 {
-	if(forward)
-		currentspeed=count1;
+	count1=(WORD)EMIOS_0.CH[3].CCNTR.R;
+	if (count1 >= count2)
+		{
+			currentspeed = count1 - count2;
+		}
 	else
-		currentspeed=-count1;
-	count1=0;
-	PIT.CH[1].TFLG.B.TIF=1;
+		{
+			currentspeed = 0xffff - (-count1 + count2);
+		}
+	if(forward)
+		currentspeed=-currentspeed;
+	count2=count1;
+	//PIT.CH[1].TFLG.B.TIF=1;*/
 }
 /****************************************************************************************************************
 * 函数名称：speed_set( )	
@@ -405,7 +414,7 @@ void Get_speed()  //定时2mse采速度
 *****************************************************************************************************************/
 void speed_set()
 {
-	if(fre_diff>-2&&fre_diff<2)
+	/*if(fre_diff>-2&&fre_diff<2)
 		Set_speed=Strait;
 	if(fre_diff>=-5&&fre_diff<=5)
 		Set_speed=Littleround;
@@ -414,7 +423,11 @@ void speed_set()
 	if(middleflag>28)
 		Set_speed=Uround;
 	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))     //判定不严谨
-		Set_speed=Biground;
+		Set_speed=Biground;*/
+	if(fre_diff>-2&&fre_diff<2)
+	{
+		
+	}
 }
 /****************************************************************************************************************
 * 函数名称：speed_control( )	
@@ -477,25 +490,25 @@ void SendHex(unsigned char hex)
 }
 
 void Senddata()
-{
+{	unsigned int i;
+	Outdata[0]=(unsigned char)LEFT;
+	Outdata[1]=(unsigned char)RIGHT;
+	Outdata[2]=(unsigned char)EMIOS_0.CH[2].CBDR.R ;
+	Outdata[3]=(unsigned char)currentspeed;
+	Outdata[4]=(unsigned char)(LEFT>>8);
+	Outdata[5]=(unsigned char)(RIGHT>>8);
+	Outdata[6]=(unsigned char)(EMIOS_0.CH[2].CBDR.R >>8);
+	Outdata[7]=(unsigned char)(currentspeed>>8);
 	LINFlex_TX('=');
 	LINFlex_TX('=');
-	temp_fre[0]=(int)fre_diff;
-	temp_fre[1]=((int)fre_diff)>>8;
-	SendHex((unsigned char)temp_fre[0]);
-	SendHex(0x00);
-	SendHex(0x00);
-	SendHex(0x00);
-	SendHex(0x00);
-	SendHex(0x00);
-	SendHex(0x00);
-	SendHex(0x00);
-	SendHex((unsigned char)temp_fre[1]);
-	SendHex(0x00);
-	SendHex(0x00);
-	SendHex(0x00);
-	SendHex(0x00);
-	SendHex(0x00);
-	SendHex(0x00);
+	for(i=0;i<8;i++)
+	{
+		SendHex(Outdata[i]);
+		if(i==3)
+		{
+			LINFlex_TX('f');
+			LINFlex_TX('f');
+		}
+	}
 }
 
