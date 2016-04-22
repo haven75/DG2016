@@ -22,12 +22,14 @@ void main(void)
 			if(steer<504)
 				steer=495;
 			if(steer>850)
-				steer=862;
+				steer=865;
 			Dis_Num(64,3,(WORD)steer,5);
 			SET_steer(steer);
+			SpeedSet();
+			speed_control();
 		}
 		Flag=0;
-		//Senddata();
+		Senddata();
 
 	}
 }

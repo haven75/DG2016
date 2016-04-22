@@ -15,23 +15,41 @@
  */
 #include"includes.h"
 float fre_diff,dis,LEFT_old,LEFT_new=0,RIGHT_old,RIGHT_new=0,MIDDLE_old,MIDDLE_new=0,temp_steer;
-unsigned int LEFT,RIGHT,MIDDLE;
 float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
-unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
-unsigned int count1,count2,currentspeed;
-float  	kp0=16.7,ki0=0,kd0=4.2,
+unsigned int left,right,middle,flag=0,zd_flag=0; //车子在赛道的位置标志
+unsigned int count1,count2,currentspeed,speed_target; 
+unsigned int presteer,currentsteer,dsteer;
+unsigned int speed1=70,
+			 speed2=60,
+			 speed3=48,
+			 speed4=48,
+			 speed5=46;
+float  /*	kp0=16.5,ki0=0,kd0=4.2,
+		kp1=12,ki=0,kd1=3.3,// 分段PID
+		kp2=7.8,ki2=0,kd2=2.15,  
+		kp3=5.7,ki3=0,kd3=1.4,
+		kp4=2.3,ki4=0,kd4=0.6;    */ //  空转83
+		
+	/*	kp0=16.7,ki0=0,kd0=4.2,
+		kp1=12,ki=0,kd1=3.2,// 分段PID
+		kp2=7.8,ki2=0,kd2=2.3,  
+		kp3=5.7,ki3=0,kd3=1.6,
+		kp4=2.3,ki4=0,kd4=0.65; //空转86*/
+		kp0=16.7,ki0=0,kd0=4.2,
 		kp1=12,ki=0,kd1=3.2,// 分段PID
 		kp2=7.8,ki2=0,kd2=2.3,  
 		kp3=5.7,ki3=0,kd3=1.6,
 		kp4=2.3,ki4=0,kd4=0.65; 
 float kp,ki,kd;
-int temp_fre[2];
-float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
-int Set_speed,temp_speed;
-float speed_kp,speed_ki,speed_kd,speed_iError,speed_lastError,speed_prevError;
+int RIGHT,LEFT,MIDDLE,temp_fre[2];
 unsigned char Outdata[8];
-
+float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
+int Set_speed,temp_speed,pwm;
+int speed_iError,speed_lastError,speed_prevError,Error[3];
+float speed_kp=5,
+	  speed_ki=1.5,
+	  speed_kd=0.5;
 
 
 /****************************************************************************************************************
@@ -207,7 +225,7 @@ signed int LocPIDCal(void)
 	
 	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint)) //左右打死保持
 	{
-	//	middleflag++;
+		middleflag++;
 		if(flag==1)
 			return(181);
 		if(flag==2)
@@ -218,7 +236,7 @@ signed int LocPIDCal(void)
 	{
 		if(MIDDLE<=Msetpoint)      //中间线圈判定频率偏差大小
 		{
-	//		middleflag++;
+			middleflag++;
 //			if(middleflag>=2)           //u形弯处理  middleflag计数
 //			{
 				if(fre_diff>=0)
@@ -239,11 +257,11 @@ signed int LocPIDCal(void)
 				fre_diff=-21-fre_diff;
 		
 		}   
-//		else
-//			middleflag=0;	
+		else
+			middleflag=0;	
 		
-		/*if(fre_diff>=0)
-			fre_diff+=1;*/
+		if(fre_diff>=0)
+			fre_diff+=1;
 		
 		
 		iError=fre_diff; 
@@ -326,6 +344,82 @@ signed int LocPIDCal(void)
 		return(temp_steer);
 	}
 
+}
+
+unsigned int abs(signed int x)
+{
+	if(x>=0)
+		return x;
+	else 
+		return -x;
+}
+
+void SpeedSet(void)
+{
+	
+    if(temp_steer<30&&temp_steer>-30)  
+    {
+    	zd_flag++;
+        speed_target = speed1;
+    } 
+    else if(temp_steer>-60 && temp_steer<60)
+    {
+    	if(zd_flag>100)
+    	{
+    		if(currentspeed>=70)
+    			speed_target=55;
+    		else if(currentspeed>=66)
+    			speed_target=57;
+    		else 
+    			speed_target=58;	
+    	}
+    	else
+    		speed_target = speed2-(abs(temp_steer)-30)/30*(speed2-speed1);
+    	zd_flag=0;
+    } 
+    else if(temp_steer>-100 && temp_steer<100)
+    {
+    	zd_flag=0; 
+        speed_target = speed3-(abs(temp_steer)-60)/40*(speed3-speed2);
+    } 
+    else if(temp_steer>=-140 && temp_steer<140)
+    {
+    	zd_flag=0;
+        speed_target = speed4-(abs(temp_steer)-100)/40*(speed4-speed3);
+    }  
+    else 
+    {
+    	zd_flag=0;
+        speed_target = speed5-(abs(temp_steer)-140)/40*(speed5-speed4);
+    }  
+    
+    if(middleflag>100)
+    	speed_target+=2;
+    
+}
+
+/****************************************************************************************************************
+* 函数名称：speed_control( )	
+* 函数功能：速度控制
+* 出口参数：无
+* 修改人  ：温泉
+* 修改时间：2016/03/16
+*****************************************************************************************************************/
+void speed_control()
+{
+	speed_iError=speed_target-currentspeed;
+	Error[2]=Error[1];
+	Error[1]=Error[0];
+	Error[0]=speed_iError;
+	
+	
+	
+	temp_speed+=speed_kp*(Error[0]-Error[1])+speed_ki*Error[0]+speed_kd*(Error[0]-Error[1]-(Error[1]-Error[2]));
+	if(temp_speed>90)
+		temp_speed=90;
+	if(temp_speed<-30)
+			temp_speed=-30;
+	SET_motor(temp_speed);
 }
 /****************************************************************************************************************
 * 函数名称：sensor_display()	
@@ -412,9 +506,9 @@ void Get_speed()  //定时2mse采速度
 * 修改人  ：温泉
 * 修改时间：2016/03/16
 *****************************************************************************************************************/
-void speed_set()
+/*void speed_set()
 {
-	/*if(fre_diff>-2&&fre_diff<2)
+	if(fre_diff>-2&&fre_diff<2)
 		Set_speed=Strait;
 	if(fre_diff>=-5&&fre_diff<=5)
 		Set_speed=Littleround;
@@ -423,29 +517,9 @@ void speed_set()
 	if(middleflag>28)
 		Set_speed=Uround;
 	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))     //判定不严谨
-		Set_speed=Biground;*/
-	if(fre_diff>-2&&fre_diff<2)
-	{
-		
-	}
+		Set_speed=Biground;
 }
-/****************************************************************************************************************
-* 函数名称：speed_control( )	
-* 函数功能：速度控制
-* 出口参数：无
-* 修改人  ：温泉
-* 修改时间：2016/03/16
-*****************************************************************************************************************/
-void speed_control()
-{
-	speed_iError=Set_speed-currentspeed;
-	
-	temp_speed=speed_kp*speed_iError-speed_ki*speed_lastError+speed_kd*speed_prevError;
-	SET_motor(temp_speed);
-	
-	speed_prevError=speed_lastError;
-	speed_lastError=speed_iError;
-}
+*/
 /****************************************************************************************************************
 * 函数名称：Set_Middlepoint()	
 * 函数功能：中间线圈频率标定

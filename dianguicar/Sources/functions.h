@@ -14,7 +14,9 @@ void InitsePID();
 void position();
 void GETservoPID();
 signed int LocPIDCal();
+void SpeedSet();
 void sensor_display();
+unsigned int abs(signed int x);
 void Get_speed();
 
 void SAIC1_inter(void);
@@ -22,7 +24,7 @@ void SAIC1_inter(void);
 void Set_Middlepoint();
 void SendHex(unsigned char hex);
 void Senddata();
-void SpeedSet();
+void speed_set();
 void speed_control();
 
 #endif /* FUNCTIONS_H_ */
