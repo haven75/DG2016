@@ -34,5 +34,9 @@
 
 
 /***************变量定义*****************/
+<<<<<<< HEAD
 #define STEER_HELM_CENTER 1623
+=======
+#define STEER_HELM_CENTER 680
+>>>>>>> master
 

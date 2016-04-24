@@ -17,6 +17,7 @@
 float fre_diff,dis,LEFT_old,LEFT_new=0,RIGHT_old,RIGHT_new=0,MIDDLE_old,MIDDLE_new=0,temp_steer;
 float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
+<<<<<<< HEAD
 unsigned int left,right,middle,flag=0,zd_flag=0; //车子在赛道的位置标志
 unsigned int count1,count2,currentspeed,speed_target; 
 unsigned int presteer,currentsteer,dsteer;
@@ -41,6 +42,16 @@ float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp2=7.5,ki2=0,kd2=2.7,  
 		kp3=5.3,ki3=0,kd3=1.7,
 		kp4=2.3,ki4=0,kd4=0.65; 
+=======
+unsigned int left,right,middle,flag=0;//车子在赛道的位置标志
+unsigned  int count1,count2;
+int currentspeed;
+float  	kp0=16,kd0=4.2,// 分段PID
+		kp1=13,kd1=3.7, 
+		kp2=8.7,kd2=2.2, 
+		kp3=5.5,kd3=1.5,
+		kp4=2.5,kd4=0.6;    
+>>>>>>> master
 float kp,ki,kd;
 int RIGHT,LEFT,MIDDLE,temp_fre[2];
 unsigned char Outdata[8];
@@ -227,6 +238,7 @@ signed int LocPIDCal(void)
 	{
 		middleflag++;
 		if(flag==1)
+<<<<<<< HEAD
 		{
 			temp_steer=181;
 			return(temp_steer);
@@ -236,25 +248,55 @@ signed int LocPIDCal(void)
 			temp_steer=-186;
 			return(temp_steer);
 		}
+=======
+			return(171);
+		if(flag==2)
+			return(-178);
+>>>>>>> master
 	}
-		
+	/*else if(fre_diff>=11)
+	{
+		flag=1;
+		return(170);
+	}
+	else if(fre_diff<=-10)
+	{
+		flag=2;
+		return(-172);
+	}*/
+	
 	else
 	{
-		if(MIDDLE<=Msetpoint)      //中间线圈判定频率偏差大小
+		if(MIDDLE<=Msetpoint/*||temp_steer<570||temp_steer>792*/)      //中间线圈判定频率偏差大小
 		{
+<<<<<<< HEAD
 			middleflag++;
 //			if(middleflag>=2)           //u形弯处理  middleflag计数
 //			{
+=======
+			if(fre_diff>=0) 
+				fre_diff=20-fre_diff;
+			else
+				fre_diff=-21-fre_diff;
+	//		middleflag++;
+	//		if(middleflag>=2)           //u形弯处理  middleflag计数
+	//		{
+>>>>>>> master
 				if(fre_diff>=0)
 				{
 					temp_steer=181;
 					flag=1;
+<<<<<<< HEAD
 					return(temp_steer);
+=======
+					return(171);
+>>>>>>> master
 				}
 				else
 				{
 					temp_steer=-186;
 					flag=2;
+<<<<<<< HEAD
 					return(temp_steer);
 				}
 //			}
@@ -263,13 +305,26 @@ signed int LocPIDCal(void)
 				fre_diff=20-fre_diff;
 			else
 				fre_diff=-21-fre_diff;
+=======
+					return(-178);
+				}
+			} 
+			
+
+>>>>>>> master
 		
-		}   
+	//	}   
 		else
 			middleflag=0;	
+<<<<<<< HEAD
 		
 		if(fre_diff>=0)
 			fre_diff+=1;
+=======
+	
+		/*if(fre_diff>=0)
+			fre_diff+=1;*/
+>>>>>>> master
 		
 		
 		iError=fre_diff; 
@@ -288,6 +343,7 @@ signed int LocPIDCal(void)
 			flag=0;
 			kp=kp4;
 			kd=kd4;
+			Set_speed=Strait;
 		}
 		else if(fre_diff>=-4&&fre_diff<=4)                                //小弯
 		{
@@ -300,7 +356,8 @@ signed int LocPIDCal(void)
 			{
 				kp=kp4+(kp3-kp4)/2*(-fre_diff-2);
 				kd=kd3;
-			}					
+			}				
+			Set_speed=Littleround;
 		}
 		else if(fre_diff>=-6&&fre_diff<=6)                                //小弯
 		{
@@ -312,6 +369,57 @@ signed int LocPIDCal(void)
 			else
 			{
 				kp=kp3+(kp2-kp3)/2*(-fre_diff-4);
+				kd=kd2;
+			}	
+			Set_speed=LittleSround;
+		}
+		else if(fre_diff>=-6&&fre_diff<=6)                                //小弯
+		{
+			if(fre_diff>=0)
+			{
+<<<<<<< HEAD
+				kp=kp3+(kp2-kp3)/2*(fre_diff-4);
+=======
+				kp=kp2+(kp1-kp2)/2*(fre_diff-6);
+				kd=kd1;
+			}
+			else
+			{
+				kp=kp2+(kp1-kp2)/2*(-fre_diff-6);
+				kd=kd1;
+			}					
+			Set_speed=Biground;
+		}
+		else                    //大弯
+		{
+			if(fre_diff>=0)
+			{
+				kp=kp1+(kp0-kp1)/5*(fre_diff-8);
+				kd=kd0;
+			}
+			else
+			{
+				kp=kp1+(kp0-kp1)/5*(-fre_diff-8);
+				kd=kd0;
+			}					
+			Set_speed=dasi;
+		}
+		SET_motor(Set_speed);
+	/*	else if(fre_diff>=-8&&fre_diff<=8)                                //小弯
+		{
+			if(fre_diff>=0)
+			{
+				kp=kp3+(kp2-kp3)/4*(fre_diff-4);
+>>>>>>> master
+				kd=kd2;
+			}
+			else
+			{
+<<<<<<< HEAD
+				kp=kp3+(kp2-kp3)/2*(-fre_diff-4);
+=======
+				kp=kp3+(kp2-kp3)/4*(-fre_diff-4);
+>>>>>>> master
 				kd=kd2;
 			}					
 		}
@@ -332,6 +440,7 @@ signed int LocPIDCal(void)
 		{
 			if(fre_diff>=0)
 			{
+<<<<<<< HEAD
 				kp=kp1+(kp0-kp1)/10*(fre_diff-8);
 				kd=kd0;
 			}
@@ -339,13 +448,28 @@ signed int LocPIDCal(void)
 			{
 				kp=kp1+(kp0-kp1)/10*(-fre_diff-8);
 				kd=kd0;
+=======
+				kp=kp2+(kp1-kp2)/8*(fre_diff-8);
+				kd=kd3;
+			}
+			else
+			{
+				kp=kp2+(kp1-kp2)/8*(-fre_diff-8);
+				kd=kd3;
+>>>>>>> master
 			}								
-		}
+		}*/
 		
 		temp_steer=kp*iError+kd*dError;
+<<<<<<< HEAD
 		if(temp_steer>=181)
 			flag=1;               //左打死
 		else if(temp_steer<=-186)
+=======
+		if(temp_steer>=171)
+			flag=1;               //左打死
+		else if(temp_steer<=-178)
+>>>>>>> master
 			flag=2;
 		else 
 			flag=0;
@@ -443,9 +567,13 @@ void sensor_display(void)
 	Dis_Num(64,1,(WORD)MIDDLE,5);
 	Dis_Num(64,2,(WORD)RIGHT,5);
 	Dis_Num(64,4,(WORD)currentspeed,5);
+<<<<<<< HEAD
 	Dis_Num(64,5,(WORD)flag,5);
 	//Dis_Num(64,5,(WORD)speed_target,5);
 
+=======
+	
+>>>>>>> master
 }
 
 /****************************************************************************************************************
@@ -463,6 +591,7 @@ void sensor_display(void)
 	{
 		count1++;
 		EMIOS_0.CH[3].CSR.B.FLAG=1;    //清除标志位
+		EMIOS_0.CH[2].CSR.B.FLAG=1;
 	}
 }*/
 /****************************************************************************************************************
@@ -517,16 +646,17 @@ void Get_speed()  //定时2mse采速度
 *****************************************************************************************************************/
 /*void speed_set()
 {
-	if(fre_diff>-2&&fre_diff<2)
-		Set_speed=Strait;
-	if(fre_diff>=-5&&fre_diff<=5)
-		Set_speed=Littleround;
-	if(fre_diff>=-7&&fre_diff<=7)
-		Set_speed=LittleSround;
-	if(middleflag>28)
-		Set_speed=Uround;
-	if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))     //判定不严谨
+	//if(((flag==1)||(flag==2))&&(MIDDLE<=Msetpoint))     //判定不严谨
+	if(temp_steer<=-178||temp_steer>=171)
 		Set_speed=Biground;
+	else if(fre_diff>-2&&fre_diff<2)
+		Set_speed=Strait;
+	else if(fre_diff>=-5&&fre_diff<=5)
+		Set_speed=Littleround;
+	else if(fre_diff>=-7&&fre_diff<=7)
+		Set_speed=LittleSround;
+	SET_motor(Set_speed);
+
 }
 */
 /****************************************************************************************************************
@@ -544,7 +674,7 @@ void Set_Middlepoint()
 	start_right=RIGHT-14;
 	sensor_compensator=RIGHT-LEFT;
 	Msetpoint=temp_middle;
-	Dis_Num(64,6,(WORD)Msetpoint,5);
+	Dis_Num(64,7,(WORD)Msetpoint,5);
 }
 
 

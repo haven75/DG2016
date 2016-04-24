@@ -22,7 +22,11 @@ void SAIC1_inter(void);
 void Set_Middlepoint();
 void SendHex(unsigned char hex);
 void Senddata();
+<<<<<<< HEAD
 void SpeedSet();
+=======
+void speed_set();
+>>>>>>> master
 void speed_control();
 
 #endif /* FUNCTIONS_H_ */
