@@ -34,5 +34,5 @@
 
 
 /***************变量定义*****************/
-#define STEER_HELM_CENTER 681
+#define STEER_HELM_CENTER 1623
 

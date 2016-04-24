@@ -20,11 +20,11 @@ float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,
 unsigned int left,right,middle,flag=0,zd_flag=0; //车子在赛道的位置标志
 unsigned int count1,count2,currentspeed,speed_target; 
 unsigned int presteer,currentsteer,dsteer;
-unsigned int speed1=70,
-			 speed2=60,
-			 speed3=48,
-			 speed4=48,
-			 speed5=46;
+unsigned int speed1=69,
+			 speed2=55,
+			 speed3=53,
+			 speed4=50,
+			 speed5=47;
 float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp1=12,ki=0,kd1=3.3,// 分段PID
 		kp2=7.8,ki2=0,kd2=2.15,  
@@ -36,10 +36,10 @@ float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp2=7.8,ki2=0,kd2=2.3,  
 		kp3=5.7,ki3=0,kd3=1.6,
 		kp4=2.3,ki4=0,kd4=0.65; //空转86*/
-		kp0=16.7,ki0=0,kd0=4.2,
-		kp1=12,ki=0,kd1=3.2,// 分段PID
-		kp2=7.8,ki2=0,kd2=2.3,  
-		kp3=5.7,ki3=0,kd3=1.6,
+		kp0=13.5,ki0=0,kd0=4,
+		kp1=10,ki=0,kd1=3,// 分段PID
+		kp2=7.5,ki2=0,kd2=2.7,  
+		kp3=5.3,ki3=0,kd3=1.7,
 		kp4=2.3,ki4=0,kd4=0.65; 
 float kp,ki,kd;
 int RIGHT,LEFT,MIDDLE,temp_fre[2];
@@ -47,7 +47,7 @@ unsigned char Outdata[8];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
 int Set_speed,temp_speed,pwm;
 int speed_iError,speed_lastError,speed_prevError,Error[3];
-float speed_kp=5,
+float speed_kp=4,
 	  speed_ki=1.5,
 	  speed_kd=0.5;
 
@@ -227,9 +227,15 @@ signed int LocPIDCal(void)
 	{
 		middleflag++;
 		if(flag==1)
-			return(181);
+		{
+			temp_steer=181;
+			return(temp_steer);
+		}
 		if(flag==2)
-			return(-186);
+		{
+			temp_steer=-186;
+			return(temp_steer);
+		}
 	}
 		
 	else
@@ -241,13 +247,15 @@ signed int LocPIDCal(void)
 //			{
 				if(fre_diff>=0)
 				{
+					temp_steer=181;
 					flag=1;
-					return(181);
+					return(temp_steer);
 				}
 				else
 				{
+					temp_steer=-186;
 					flag=2;
-					return(-186);
+					return(temp_steer);
 				}
 //			}
 			
@@ -366,7 +374,7 @@ void SpeedSet(void)
     {
     	if(zd_flag>100)
     	{
-    		if(currentspeed>=70)
+    		if(currentspeed>=68)
     			speed_target=55;
     		else if(currentspeed>=66)
     			speed_target=57;
@@ -435,7 +443,8 @@ void sensor_display(void)
 	Dis_Num(64,1,(WORD)MIDDLE,5);
 	Dis_Num(64,2,(WORD)RIGHT,5);
 	Dis_Num(64,4,(WORD)currentspeed,5);
-	//Dis_Num(64,5,(WORD)(-fre_diff),5);
+	Dis_Num(64,5,(WORD)flag,5);
+	//Dis_Num(64,5,(WORD)speed_target,5);
 
 }
 
