@@ -33,7 +33,7 @@ void initALL(void);
 
 //***********************电机舵机接口函数**********************************************************************//
 void SET_steer(signed int ServoPWM);	//50Hz 占空比:7.5%+-5% 中位：50000*7.5%=3750
-void SET_motor(signed int speed); //5kHz 正反转,要限位     
+void SET_motor(signed int speed); //5kHz 正反转,要限位   
 //*************************蓝牙接口函数************************************************************************//
 void LINFlex_TX(unsigned char data);
 void LINFlex_RX_Interrupt(void);

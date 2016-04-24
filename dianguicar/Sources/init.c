@@ -88,11 +88,7 @@ void initEMIOS_0MotorAndSteer(void)
 	EMIOS_0.CH[9].CCR.B.MODE = 0x60;	/* Mode is OPWM Buffered */
 	EMIOS_0.CH[9].CCR.B.EDPOL = 1;	/* Polarity-leading edge sets output/trailing clears*/
 	EMIOS_0.CH[9].CADR.R = 1;	/* Leading edge when channel counter bus= */
-<<<<<<< HEAD
 	EMIOS_0.CH[9].CBDR.R = 88;	/* Trailing edge when channel counter bus= */
-=======
-	EMIOS_0.CH[9].CBDR.R = 92;	/* Trailing edge when channel counter bus= */
->>>>>>> master
 	
 	SIU.PCR[9].R = 0x0600;	/*[11:10]选择AFx 此处AF1 /* MPC56xxS: Assign EMIOS_0 ch 21 to pad */
 	
@@ -137,9 +133,9 @@ void SET_motor(signed int speed)
 	}
 }
 /*************************舵机接口函数***********************/
-void SET_steer(signed int Steer)
+void SET_steer(signed int steer)
 {
-	EMIOS_0.CH[2].CBDR.R = Steer;
+	EMIOS_0.CH[2].CBDR.R = steer;
 }
 
 
@@ -166,14 +162,14 @@ void initPIT(void)
   PIT.CH[0].LDVAL.R = 128000;        //PIT0 timeout=160000 sysclks x 1sec/80M sysclks =2msec
   PIT.CH[0].TCTRL.R = 0X00000003;    //Enable PIT0 interrupt and make PIT active to count 
   
-  PIT.CH[1].LDVAL.R = 64000;      // PIT1 timeout = 64000 sysclks x 1sec/64M sysclks = 1msec 
+  PIT.CH[1].LDVAL.R = 800000;      // PIT1 timeout = 800000 sysclks x 1sec/80M sysclks = 10msec 
   PIT.CH[1].TCTRL.R = 0x00000003; // Enable PIT1 interrupt and make PIT active to count 
   
  // PIT.CH[2].LDVAL.R =320000000;    //设置计数值为32000000
  // PIT.CH[2].TCTRL.R = 0x000000003; //使能PIT2计数，并使能中断
   
   INTC_InstallINTCInterruptHandler(Pit0ISR,59,1); 
- // INTC_InstallINTCInterruptHandler(Get_speed,60,2);
+ // INTC_InstallINTCInterruptHandler(Pit1ISR,60,2);
 }
 
 
@@ -214,11 +210,7 @@ void initEMIOS_0ModulusCounter(void) //频率采集初始化
 		/* (WORD)EMIOS_0.CH[23].CCNTR.R 数据寄存器 */
 	SIU.PCR[71].R = 0x0500;	/* Initialize pad for eMIOS channel Initialize pad for input */
 	
-<<<<<<< HEAD
 	/*计数部分 PE7 */
-=======
-	/*********************************速度采集*****************************************/
->>>>>>> master
 	EMIOS_0.CH[3].CCR.B.MODE = 0x51;	/* Mode is MCB */
 	EMIOS_0.CH[3].CCR.B.BSL = 0x3;	/* Use internal counter */
 	EMIOS_0.CH[3].CCR.B.UCPRE=0;	/* Set channel prescaler to divide by 1 */
@@ -226,11 +218,7 @@ void initEMIOS_0ModulusCounter(void) //频率采集初始化
 	EMIOS_0.CH[3].CCR.B.FREN = 0;	/* Freeze channel counting when in debug mode */
 	EMIOS_0.CH[3].CCR.B.EDPOL=1;	/* Edge Select rising edge */
 	EMIOS_0.CH[3].CADR.R=0xffff;
-<<<<<<< HEAD
 		/* (WORD)EMIOS_0.CH[23].CCNTR.R 数据寄存器 */
-=======
-		/* (WORD)EMIOS_0.CH[24].CCNTR.R 数据寄存器 */
->>>>>>> master
 	SIU.PCR[3].R = 0x0500;	/* Initialize pad for eMIOS channel Initialize pad for input */
 	
 }

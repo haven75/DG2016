@@ -18,7 +18,6 @@ void main(void)
 			position();
 			GETservoPID();
 			steer=STEER_HELM_CENTER+LocPIDCal();
-<<<<<<< HEAD
 			if(steer<1438)
 				steer=1408;
 			if(steer>1804)
@@ -30,20 +29,6 @@ void main(void)
 		}
 		Flag=0;
 		Senddata();
-
-=======
-			if(steer<503)
-				steer=498;
-			if(steer>850)
-				steer=859;
-			Dis_Num(64,3,(WORD)steer,5);
-			SET_steer(steer);
-			//speed_set();
-		}
-		//Senddata();
-		//LINFlex_TX((unsigned char)steer);
-		Flag=0;
->>>>>>> master
 	}
 }
 
@@ -56,10 +41,7 @@ void Pit0ISR()
 	if(wait>0)
 		wait--;
 	PIT.CH[0].TFLG.B.TIF = 1;
-<<<<<<< HEAD
-=======
 
->>>>>>> master
 }
 
 
