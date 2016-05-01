@@ -1,6 +1,13 @@
 /*
  * functions.h
  *
+ *  Created on: May 1, 2016
+ *      Author: Quan
+ */
+
+/*
+ * functions.h
+ *
  *  Created on: Feb 27, 2016
  *      Author: Administrator
  */
@@ -17,7 +24,7 @@ signed int LocPIDCal();
 void sensor_display();
 void Get_speed();
 
-void SAIC1_inter(void);
+//void SAIC1_inter(void);
 //void SAIC2_inter(void);
 void Set_Middlepoint();
 void SendHex(unsigned char hex);

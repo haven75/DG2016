@@ -20,13 +20,13 @@ void main(void)
 			GETservoPID();
 			steer=STEER_HELM_CENTER+LocPIDCal();
 			if(steer<700)
-				steer=692;
+				steer=660;
 			if(steer>1050)
-				steer=1058;
+				steer=1090;
 			Dis_Num(64,3,(WORD)steer,5);
 			SET_steer(steer);
 			SpeedSet();
-			speed_control();
+			//speed_control();
 		}
 		Flag=0;
 		Senddata();

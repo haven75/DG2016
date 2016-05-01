@@ -20,11 +20,11 @@ float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,
 unsigned int left,right,middle,flag=0,zd_flag=0; //车子在赛道的位置标志
 unsigned int count1,count2,currentspeed,speed_target; 
 unsigned int presteer,currentsteer,dsteer;
-unsigned int speed1=69,
-			 speed2=54,
-			 speed3=52,
-			 speed4=50,
-			 speed5=48;
+unsigned int speed1=67,
+			 speed2=52,
+			 speed3=50,
+			 speed4=48,
+			 speed5=46;
 float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp1=12,ki=0,kd1=3.3,// 分段PID
 		kp2=7.8,ki2=0,kd2=2.15,  
@@ -37,11 +37,18 @@ float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp3=5.7,ki3=0,kd3=1.6,
 		kp4=2.3,ki4=0,kd4=0.65; //空转86*/
 
-		kp0=13.7,ki0=0,kd0=3.6,
-		kp1=9.9,ki=0,kd1=2.4,// 分段PID
-		kp2=7.6,ki2=0,kd2=1.9,  
-		kp3=5.3,ki3=0,kd3=1.5,
+	/*	kp0=12.5,ki0=0,kd0=3.2,
+		kp1=9.2,ki=0,kd1=2.4,// 分段PID 开环不太抖 闭环略抖
+		kp2=7.2,ki2=0,kd2=1.8,  
+		kp3=4.5,ki3=0,kd3=1.2,
+		kp4=2,ki4=0,kd4=0.5; */
+
+		kp0=12.2,ki0=0,kd0=3.1,
+		kp1=9.3,ki=0,kd1=2.3,// 分段PID
+		kp2=7.3,ki2=0,kd2=1.6,  
+		kp3=4.7,ki3=0,kd3=1.15,
 		kp4=2.3,ki4=0,kd4=0.65; 
+
 float kp,ki,kd;
 int RIGHT,LEFT,MIDDLE,temp_fre[2];
 unsigned char Outdata[8];
@@ -49,7 +56,7 @@ float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middlefl
 int Set_speed,temp_speed,pwm;
 int speed_iError,speed_lastError,speed_prevError,Error[3];
 float speed_kp=4,
-	  speed_ki=1.3,
+	  speed_ki=1.5,
 	  speed_kd=0.6;
 
 
@@ -273,6 +280,8 @@ signed int LocPIDCal(void)
 			fre_diff*=1.15;
 		if(fre_diff<-9)
 			fre_diff*=1.15;
+		if(fre_diff>0)
+			fre_diff+=1;
 		
 		
 		iError=fre_diff; 
@@ -378,11 +387,11 @@ void SpeedSet(void)
     	if(zd_flag>100)
     	{
     		if(currentspeed>=69)
-    			speed_target=52;
+    			speed_target=50;
     		else if(currentspeed>=67)
-    			speed_target=54;
+    			speed_target=51;
     		else 
-    			speed_target=55;	
+    			speed_target=52;	
     	}
     	else
     		speed_target = speed2-(abs(temp_steer)-30)/30*(speed2-speed1);

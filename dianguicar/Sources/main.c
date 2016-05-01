@@ -25,7 +25,8 @@ void main(void)
 			Dis_Num(64,3,(WORD)steer,5);
 			SET_steer(steer);
 			SpeedSet();
-			speed_control();
+			if(switch1==0)
+				speed_control();
 		}
 		Flag=0;
 		Senddata();
