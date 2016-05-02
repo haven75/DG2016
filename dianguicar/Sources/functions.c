@@ -36,9 +36,9 @@ float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp2=7.8,ki2=0,kd2=2.3,  
 		kp3=5.7,ki3=0,kd3=1.6,
 		kp4=2.3,ki4=0,kd4=0.65; //空转86*/
-		kp0=13.5,ki0=0,kd0=3.75,
-		kp1=9.4,ki=0,kd1=2.9,// 分段PID
-		kp2=7.1,ki2=0,kd2=2.05,  
+		kp0=13.5,ki0=0,kd0=3.8,
+		kp1=9.4,ki=0,kd1=2.85,// 分段PID
+		kp2=7.1,ki2=0,kd2=2.15,  
 		kp3=5,ki3=0,kd3=1.55,
 		kp4=2,ki4=0,kd4=0.65; 
 float kp,ki,kd;
@@ -46,10 +46,10 @@ int RIGHT,LEFT,MIDDLE,temp_fre[2],temp_steer_old,dtemp_steer;
 unsigned char Outdata[8];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
 int Set_speed,temp_speed,pwm;
-int speed_iError,speed_lastError,speed_prevError,Error[3];
-float speed_kp=5,
-	  speed_ki=0.5,
-	  speed_kd=0.5;
+int speed_iError,speed_lastError,speed_prevError,Error[3],Sumerror;
+float speed_kp=4.5,
+	  speed_ki=1.2,
+	  speed_kd=0.1;
 
 
 /****************************************************************************************************************
@@ -422,15 +422,18 @@ void speed_control()
 	Error[2]=Error[1];
 	Error[1]=Error[0];
 	Error[0]=speed_iError;
+	Sumerror+=speed_iError;
 	
 	
 	
+	//temp_speed=speed_kp*speed_iError+speed_ki*Sumerror+speed_kd*(speed_iError-speed_prevError);
 	temp_speed+=speed_kp*(Error[0]-Error[1])+speed_ki*Error[0]+speed_kd*(Error[0]-Error[1]-(Error[1]-Error[2]));
 	if(temp_speed>120)
 		temp_speed=120;
 	if(temp_speed<-90)
 			temp_speed=-90;
 	SET_motor(temp_speed);
+	speed_prevError=speed_iError;
 }
 /****************************************************************************************************************
 * 函数名称：sensor_display()	
@@ -579,11 +582,11 @@ void Senddata()
 {	unsigned int i;
 	Outdata[0]=(unsigned char)LEFT;
 	Outdata[1]=(unsigned char)RIGHT;
-	Outdata[2]=(unsigned char)EMIOS_0.CH[2].CBDR.R ;
+	Outdata[2]=(unsigned char)speed_target;//EMIOS_0.CH[2].CBDR.R ;
 	Outdata[3]=(unsigned char)currentspeed;
 	Outdata[4]=(unsigned char)(LEFT>>8);
 	Outdata[5]=(unsigned char)(RIGHT>>8);
-	Outdata[6]=(unsigned char)(EMIOS_0.CH[2].CBDR.R >>8);
+	Outdata[6]=(unsigned char)(speed_target)>>8;//(EMIOS_0.CH[2].CBDR.R >>8);
 	Outdata[7]=(unsigned char)(currentspeed>>8);
 	LINFlex_TX('=');
 	LINFlex_TX('=');
