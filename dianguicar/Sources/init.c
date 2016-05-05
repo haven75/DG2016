@@ -88,7 +88,7 @@ void initEMIOS_0MotorAndSteer(void)
 	EMIOS_0.CH[9].CCR.B.MODE = 0x60;	/* Mode is OPWM Buffered */
 	EMIOS_0.CH[9].CCR.B.EDPOL = 1;	/* Polarity-leading edge sets output/trailing clears*/
 	EMIOS_0.CH[9].CADR.R = 1;	/* Leading edge when channel counter bus= */
-	EMIOS_0.CH[9].CBDR.R = 88;	/* Trailing edge when channel counter bus= */
+	EMIOS_0.CH[9].CBDR.R = 83;	/* Trailing edge when channel counter bus= */
 	
 	SIU.PCR[9].R = 0x0600;	/*[11:10]选择AFx 此处AF1 /* MPC56xxS: Assign EMIOS_0 ch 21 to pad */
 	
@@ -159,7 +159,7 @@ void initPIT(void)
 {                                 //PIT02msec中断立controlflag  PIT1速度反馈2ms一个控制周期
                            	       // NOTE:  DIVIDER FROM SYSCLK TO PIT ASSUMES DEFAULT DIVIDE BY 1 
   PIT.PITMCR.R = 0x00000001;       // Enable PIT and configure timers to stop in debug mode 
-  PIT.CH[0].LDVAL.R = 128000;        //PIT0 timeout=160000 sysclks x 1sec/80M sysclks =2msec
+  PIT.CH[0].LDVAL.R = 320000;        //PIT0 timeout=160000 sysclks x 1sec/80M sysclks =2msec
   PIT.CH[0].TCTRL.R = 0X00000003;    //Enable PIT0 interrupt and make PIT active to count 
   
   PIT.CH[1].LDVAL.R = 800000;      // PIT1 timeout = 800000 sysclks x 1sec/80M sysclks = 10msec 
