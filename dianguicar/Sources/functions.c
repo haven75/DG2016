@@ -20,11 +20,11 @@ float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,
 unsigned int left,right,middle,flag=0,zd_flag=0; //车子在赛道的位置标志
 unsigned int count1,count2,currentspeed,speed_target; 
 unsigned int presteer,currentsteer,dsteer;
-unsigned int speed1=58,
-			 speed2=45,
-			 speed3=44,
-			 speed4=42,
-			 speed5=40;
+unsigned int speed1=57,
+			 speed2=46,
+			 speed3=45,
+			 speed4=43,
+			 speed5=41;
 float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp1=12,ki=0,kd1=3.3,// 分段PID
 		kp2=7.8,ki2=0,kd2=2.15,  
@@ -36,20 +36,20 @@ float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp2=7.8,ki2=0,kd2=2.3,  
 		kp3=5.7,ki3=0,kd3=1.6,
 		kp4=2.3,ki4=0,kd4=0.65; //空转86*/
-		kp0=16,ki0=0,kd0=4,
-		kp1=11.5,ki=0,kd1=3.2,// 分段PID
-		kp2=8.7,ki2=0,kd2=2.35,  
-		kp3=5.9,ki3=0,kd3=1.75,
-		kp4=2.9,ki4=0,kd4=0.95; 
+		kp0=15.7,ki0=0,kd0=4,
+		kp1=11.5,ki=0,kd1=3.3,// 分段PID
+		kp2=8.5,ki2=0,kd2=2.5,  
+		kp3=5.5,ki3=0,kd3=1.75,
+		kp4=2.5,ki4=0,kd4=0.7; 
 float kp,ki,kd;
 int RIGHT,LEFT,MIDDLE,temp_fre[2],temp_steer_old,dtemp_steer;
 unsigned char Outdata[8];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
 int Set_speed,temp_speed,pwm;
 int speed_iError,speed_lastError,speed_prevError,Error[3],Sumerror;
-float speed_kp=4.5/2.5,
-	  speed_ki=1.2/2.5,
-	  speed_kd=0.1/2.5;
+float speed_kp=5.4/2.5,
+	  speed_ki=1.1/2.5,
+	  speed_kd=0.258/2.5;
 
 
 /****************************************************************************************************************
@@ -366,16 +366,16 @@ void SpeedSet(void)
 {
 	dtemp_steer=temp_steer-temp_steer_old;
 	temp_steer_old=temp_steer;
-	if(dtemp_steer>100&&dtemp_steer<-100)
-		speed_target=40;
-	else if(temp_steer<30&&temp_steer>-30)  
+//	if(dtemp_steer>100&&dtemp_steer<-100)
+//		speed_target=40;
+	 if(temp_steer<30&&temp_steer>-30)  
     {
     	zd_flag++;
         speed_target = speed1;
     } 
     else if(temp_steer>-60 && temp_steer<60)
     {
-    	if(zd_flag>40)
+    	if(zd_flag>25)
     	{
     		if(currentspeed>=speed1)
     			speed_target=speed4;
@@ -404,8 +404,8 @@ void SpeedSet(void)
         speed_target = speed5-(abs(temp_steer)-140)/40*(speed5-speed4);
     }  
     
-    if(middleflag>100)
-    	speed_target+=2;
+//    if(middleflag>100)
+ //   	speed_target+=2;
     
 }
 
@@ -428,10 +428,10 @@ void speed_control()
 	
 	//temp_speed=speed_kp*speed_iError+speed_ki*Sumerror+speed_kd*(speed_iError-speed_prevError);
 	temp_speed+=speed_kp*(Error[0]-Error[1])+speed_ki*Error[0]+speed_kd*(Error[0]-Error[1]-(Error[1]-Error[2]));
-	if(temp_speed>110)
-		temp_speed=110;
-	if(temp_speed<-140)
-			temp_speed=-140;
+	if(temp_speed>106)
+		temp_speed=106;
+	if(temp_speed<-110)
+			temp_speed=-110;
 	SET_motor(temp_speed);
 	speed_prevError=speed_iError;
 }
@@ -449,7 +449,7 @@ void sensor_display(void)
 	Dis_Num(64,1,(WORD)MIDDLE,5);
 	Dis_Num(64,2,(WORD)RIGHT,5);
 	Dis_Num(64,4,(WORD)currentspeed,5);
-	Dis_Num(64,5,(WORD)flag,5);
+	Dis_Num(64,5,(WORD)speed_target,5);
 	//Dis_Num(64,6,(WORD)fre_diff,5);
 
 }
@@ -582,11 +582,11 @@ void Senddata()
 {	unsigned int i;
 	Outdata[0]=(unsigned char)LEFT;
 	Outdata[1]=(unsigned char)RIGHT;
-	Outdata[2]=(unsigned char)speed_target;//EMIOS_0.CH[2].CBDR.R ;
+	Outdata[2]=(unsigned char)speed_target*2.5;//EMIOS_0.CH[2].CBDR.R ;
 	Outdata[3]=(unsigned char)currentspeed;
 	Outdata[4]=(unsigned char)(LEFT>>8);
 	Outdata[5]=(unsigned char)(RIGHT>>8);
-	Outdata[6]=(unsigned char)(speed_target)>>8;//(EMIOS_0.CH[2].CBDR.R >>8);
+	Outdata[6]=(unsigned char)(speed_target*2.5)>>8;//(EMIOS_0.CH[2].CBDR.R >>8);
 	Outdata[7]=(unsigned char)(currentspeed>>8);
 	LINFlex_TX('=');
 	LINFlex_TX('=');
