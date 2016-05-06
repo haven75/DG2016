@@ -22,8 +22,8 @@ unsigned int count1,count2,currentspeed,speed_target;
 unsigned int presteer,currentsteer,dsteer;
 unsigned int speed1=62,
 			 speed2=47,
-			 speed3=45,
-			 speed4=43,
+			 speed3=46,
+			 speed4=44,
 			 speed5=42;
 float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp1=12,ki=0,kd1=3.3,// ·Ö¶ÎPID
@@ -36,11 +36,12 @@ float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp2=7.8,ki2=0,kd2=2.3,  
 		kp3=5.7,ki3=0,kd3=1.6,
 		kp4=2.3,ki4=0,kd4=0.65; //¿Õ×ª86*/
+
 		kp0=15.7,ki0=0,kd0=4,
 		kp1=11.5,ki=0,kd1=3.3,// ·Ö¶ÎPID
 		kp2=8.5,ki2=0,kd2=2.5,  
-		kp3=5.5,ki3=0,kd3=1.75,
-		kp4=2.3,ki4=0,kd4=0.7; 
+		kp3=5.4,ki3=0,kd3=1.7,
+		kp4=2.3,ki4=0,kd4=0.65; 
 float kp,ki,kd;
 int RIGHT,LEFT,MIDDLE,temp_fre[2],temp_steer_old,dtemp_steer;
 unsigned char Outdata[8];
@@ -428,10 +429,10 @@ void speed_control()
 	
 	//temp_speed=speed_kp*speed_iError+speed_ki*Sumerror+speed_kd*(speed_iError-speed_prevError);
 	temp_speed+=speed_kp*(Error[0]-Error[1])+speed_ki*Error[0]+speed_kd*(Error[0]-Error[1]-(Error[1]-Error[2]));
-	if(temp_speed>106)
-		temp_speed=106;
-	if(temp_speed<-110)
-			temp_speed=-110;
+	if(temp_speed>115)
+		temp_speed=115;
+	if(temp_speed<-100)
+			temp_speed=-100;
 	SET_motor(temp_speed);
 	speed_prevError=speed_iError;
 }
