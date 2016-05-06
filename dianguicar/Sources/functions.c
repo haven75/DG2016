@@ -20,11 +20,11 @@ float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,
 unsigned int left,right,middle,flag=0,zd_flag=0; //车子在赛道的位置标志
 unsigned int count1,count2,currentspeed,speed_target; 
 unsigned int presteer,currentsteer,dsteer;
-unsigned int speed1=57,
-			 speed2=46,
+unsigned int speed1=62,
+			 speed2=47,
 			 speed3=45,
 			 speed4=43,
-			 speed5=41;
+			 speed5=42;
 float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp1=12,ki=0,kd1=3.3,// 分段PID
 		kp2=7.8,ki2=0,kd2=2.15,  
@@ -40,7 +40,7 @@ float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp1=11.5,ki=0,kd1=3.3,// 分段PID
 		kp2=8.5,ki2=0,kd2=2.5,  
 		kp3=5.5,ki3=0,kd3=1.75,
-		kp4=2.5,ki4=0,kd4=0.7; 
+		kp4=2.3,ki4=0,kd4=0.7; 
 float kp,ki,kd;
 int RIGHT,LEFT,MIDDLE,temp_fre[2],temp_steer_old,dtemp_steer;
 unsigned char Outdata[8];
