@@ -12,6 +12,9 @@
 #include "define.h"
 #include "functions.h"
 #include "oleddriver.h"
+#include "Supersonic.h"
+#include "Beep.h"
+#include "AD_Scan.h"
 
 
 
@@ -36,4 +39,7 @@
 /***************变量定义*****************/
 
 #define STEER_HELM_CENTER 1635
+#define ON 1
+#define OFF 0
+
 

@@ -26,6 +26,8 @@ void initALL(void)
 	initADC();
 	//SAIC_INIT();
 	LCD_Init();
+	Supersonic();
+	initBeep();
 	
 	enableIrq();
 }
@@ -159,14 +161,16 @@ void initPIT(void)
 {                                 //PIT02msec中断立controlflag  PIT1速度反馈2ms一个控制周期
                            	       // NOTE:  DIVIDER FROM SYSCLK TO PIT ASSUMES DEFAULT DIVIDE BY 1 
   PIT.PITMCR.R = 0x00000001;       // Enable PIT and configure timers to stop in debug mode 
-  PIT.CH[0].LDVAL.R = 320000;        //PIT0 timeout=160000 sysclks x 1sec/80M sysclks =2msec
+  PIT.CH[0].LDVAL.R = 320000;        //PIT0 timeout=160000 sysclks x 1sec/80M sysclks =5msec
   PIT.CH[0].TCTRL.R = 0X00000003;    //Enable PIT0 interrupt and make PIT active to count 
   
   PIT.CH[1].LDVAL.R = 800000;      // PIT1 timeout = 800000 sysclks x 1sec/80M sysclks = 10msec 
   PIT.CH[1].TCTRL.R = 0x00000003; // Enable PIT1 interrupt and make PIT active to count 
   
- // PIT.CH[2].LDVAL.R =320000000;    //设置计数值为32000000
- // PIT.CH[2].TCTRL.R = 0x000000003; //使能PIT2计数，并使能中断
+
+  PIT.CH[2].LDVAL.R=2400000;
+
+  
   
   INTC_InstallINTCInterruptHandler(Pit0ISR,59,1); 
  // INTC_InstallINTCInterruptHandler(Pit1ISR,60,2);
@@ -237,7 +241,7 @@ void initADC(void)
 	//SIU.PCR[25].R = 0x2000;         /* MPC56xxB: Initialize PB[9] as ANS1 */
     //ADC.MCR.B.NSTART=1;             /* Trigger normal conversions for ADC0 */
     ADC.MCR.R        = 0x20000000;        //初始化ADC为扫描模式，时钟为32MHz。
-    ADC.NCMR[0].R    = 0x0000000F;        //选择转换ADC0,ADC1,ADC2,ADC3
+    ADC.NCMR[0].R    = 0x00000003;        //选择转换ADC0,ADC1
     ADC.CTR[0].R     = 0x00008606;        //设置转换时间
    	SIU.PCR[20].R = 0x2000;               // 设置PB[4]为ADC0模数转换输入
   	SIU.PCR[21].R = 0x2000;               // 设置PB[5]为ADC1模数转换输入
@@ -294,6 +298,28 @@ void initOLED(void)
 	SIU.PCR[30].R = 0x0203;  
 	SIU.PCR[31].R = 0x0203;  
 }
+
+/*********************超声波初始化************************/
+void Supersonic(void)
+{
+	SIU.PCR[58].R=0x0203;
+	
+	/************************脉冲宽度检测***********************/
+	EMIOS_0.CH[7].CCR.B.MODE  = 0x04;   //设置输入捕捉SAIC模式
+	EMIOS_0.CH[7].CCR.B.BSL   = 0x3;    //使用1MHz的内部计数器作为时钟源
+//	EMIOS_0.CH[7].CCR.B.IF   = 0x2;     //设置输入滤波器
+	EMIOS_0.CH[7].CCR.B.FCK  = 1;       //滤波器时钟为主时钟
+	EMIOS_0.CH[7].CCR.B.DMA  = 0;       //FLAG用作中断请求
+	EMIOS_0.CH[7].CCR.B.EDSEL  = 0;       //设置上升沿触发中断
+	EMIOS_0.CH[7].CCR.B.EDPOL  = 1;      
+	EMIOS_0.CH[7].CCR.B.UCPRE = 0;      //设置分频值为1
+	EMIOS_0.CH[7].CCR.B.UCPEN = 1;      //使能分频器
+	EMIOS_0.CH[7].CCR.B.FREN  = 0;      //在冻结模式下停止计数
+	EMIOS_0.CH[7].CCR.B.FEN  = 1;       //使能输入捕捉中断
+	
+	SIU.PCR[7].R = 0x0100; 
+	//INTC_InstallINTCInterruptHandler(Supersonic_Echo,144,2);
+}
 /*********************拨码开关、按键初始化************************/
 void initKeys_Switchs(void)
 {
@@ -305,7 +331,11 @@ void initKeys_Switchs(void)
 	SIU.PCR[56].R = 0x0100;               // PD[8]: Input  switch1
 }
 
-
+/*************************蜂鸣器*****************************/
+void initBeep(void)
+{
+	SIU.PCR[43].R=0X0203;
+}
 /*void SAIC_INIT(void)
 {
 	EMIOS_0.CH[3].CCR.B.MODE  = 0x02;   //设置输入捕捉SAIC模式
@@ -323,18 +353,5 @@ void initKeys_Switchs(void)
 	SIU.PCR[3].R = 0x0102; 
 	//INTC_InstallINTCInterruptHandler(SAIC1_inter,142,1);
 
-	/*EMIOS_0.CH[7].CCR.B.MODE  = 0x02;   //设置输入捕捉SAIC模式
-	EMIOS_0.CH[7].CCR.B.BSL   = 0x3;    //使用1MHz的内部计数器作为时钟源
-	EMIOS_0.CH[7].CCR.B.IF   = 0x2;     //设置输入滤波器
-	EMIOS_0.CH[7].CCR.B.FCK  = 1;       //滤波器时钟为主时钟
-	EMIOS_0.CH[7].CCR.B.FEN  = 1;       //使能输入捕捉中断
-	EMIOS_0.CH[7].CCR.B.DMA  = 0;       //FLAG用作中断请求
-	EMIOS_0.CH[7].CCR.B.EDSEL  = 0;       //设置下降沿沿触发中断
-	EMIOS_0.CH[7].CCR.B.EDPOL  = 1;      
-	EMIOS_0.CH[7].CCR.B.UCPRE = 0;      //设置分频值为1
-	EMIOS_0.CH[7].CCR.B.UCPEN = 1;      //使能分频器
-	EMIOS_0.CH[7].CCR.B.FREN  = 1;      //在冻结模式下停止计数
-	
-	SIU.PCR[7].R = 0x0102; 
-	INTC_InstallINTCInterruptHandler(SAIC2_inter,144,1);
+
 }*/

@@ -18,13 +18,13 @@ float fre_diff,dis,LEFT_old,LEFT_new=0,RIGHT_old,RIGHT_new=0,MIDDLE_old,MIDDLE_n
 float LEFT_Temp,RIGHT_Temp,MIDDLE_Temp,Lsum,Rsum,Msum;
 float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,0.15,0.7};
 unsigned int left,right,middle,flag=0,zd_flag=0; //车子在赛道的位置标志
-unsigned int count1,count2,currentspeed,speed_target; 
+unsigned int count1,count2,currentspeed,speed_target,speed[10],tempspeed; 
 unsigned int presteer,currentsteer,dsteer;
-unsigned int speed1=62,
-			 speed2=47,
-			 speed3=46,
-			 speed4=44,
-			 speed5=42;
+unsigned int speed1=63,
+			 speed2=46,
+			 speed3=45,
+			 speed4=45,
+			 speed5=43;
 float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp1=12,ki=0,kd1=3.3,// 分段PID
 		kp2=7.8,ki2=0,kd2=2.15,  
@@ -37,11 +37,11 @@ float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp3=5.7,ki3=0,kd3=1.6,
 		kp4=2.3,ki4=0,kd4=0.65; //空转86*/
 
-		kp0=15.7,ki0=0,kd0=4,
-		kp1=11.5,ki=0,kd1=3.3,// 分段PID
-		kp2=8.5,ki2=0,kd2=2.5,  
-		kp3=5.4,ki3=0,kd3=1.7,
-		kp4=2.3,ki4=0,kd4=0.65; 
+		kp0=15.7,ki0=0,kd0=4.3,
+		kp1=11.5,ki=0,kd1=3.2,// 分段PID
+		kp2=8.5,ki2=0,kd2=2.45,  
+		kp3=5.4,ki3=0,kd3=1.55,
+		kp4=2.3,ki4=0,kd4=0.6; 
 float kp,ki,kd;
 int RIGHT,LEFT,MIDDLE,temp_fre[2],temp_steer_old,dtemp_steer;
 unsigned char Outdata[8];
@@ -429,10 +429,10 @@ void speed_control()
 	
 	//temp_speed=speed_kp*speed_iError+speed_ki*Sumerror+speed_kd*(speed_iError-speed_prevError);
 	temp_speed+=speed_kp*(Error[0]-Error[1])+speed_ki*Error[0]+speed_kd*(Error[0]-Error[1]-(Error[1]-Error[2]));
-	if(temp_speed>115)
-		temp_speed=115;
-	if(temp_speed<-100)
-			temp_speed=-100;
+	if(temp_speed>105)
+		temp_speed=105;
+	if(temp_speed<-90)
+			temp_speed=-90;
 	SET_motor(temp_speed);
 	speed_prevError=speed_iError;
 }
@@ -501,6 +501,7 @@ void sensor_display(void)
 *****************************************************************************************************************/
 void Get_speed()  //定时2mse采速度
 {
+	unsigned k;
 	count1=(WORD)EMIOS_0.CH[3].CCNTR.R;
 	if (count1 >= count2)
 		{
@@ -513,6 +514,13 @@ void Get_speed()  //定时2mse采速度
 	if(forward)
 		currentspeed=-currentspeed;
 	count2=count1;
+	/*for(k=0;k<9;k++)
+		speed[k]=speed[k+1];
+	speed[9]=currentspeed;
+	tempspeed=0;
+	for(k=0;k<10;k++)
+		tempspeed+=speed[k]*avr[k];
+	currentspeed=tempspeed;
 	//PIT.CH[1].TFLG.B.TIF=1;*/
 }
 /****************************************************************************************************************
