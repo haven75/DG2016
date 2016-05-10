@@ -14,17 +14,19 @@ void main(void)
 	Set_Middlepoint();
 	for (;;) 
 	{
+		sensor_display();
+		Dis_Num(64,3,(WORD) steer,5);
+		StartDetect();             //起跑及终点线检测
+		//while(!StartFlag);         //起跑检测
 		if(Flag==1)
 		{
-			sensor_display();
 			position();
-			GETservoPID();
 			steer=STEER_HELM_CENTER+LocPIDCal();
 			if(steer<=1449)
 				steer=1404;
 			if(steer>=1814)
 				steer=1860;
-			while(Supersonic_t>6)
+			while(Supersonic_t>5)     //30ms检测直道触发超声波
 			{
 				//if(steer>1580&&steer<1700)
 					Supersonic_Trig();      //触发发送超声波
@@ -38,10 +40,9 @@ void main(void)
 					Beep_ON();
 				Supersonic_flag=0;	
 			}
-			Dis_Num(64,3,(WORD) steer,5);
 			SET_steer(steer);
 			SpeedSet();
-			speed_control();
+		//	speed_control();
 		}
 		Flag=0;
 		Senddata();

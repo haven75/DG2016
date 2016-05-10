@@ -20,11 +20,11 @@ float sensor[3][10]={0},avr[10]={0.005,0.01,0.01,0.0125,0.0125,0.025,0.025,0.05,
 unsigned int left,right,middle,flag=0,zd_flag=0; //车子在赛道的位置标志
 unsigned int count1,count2,currentspeed,speed_target,speed[10],tempspeed; 
 unsigned int presteer,currentsteer,dsteer;
-unsigned int speed1=63,
-			 speed2=46,
-			 speed3=45,
-			 speed4=45,
-			 speed5=43;
+unsigned int speed1=58,
+			 speed2=48,
+			 speed3=48,
+			 speed4=48,
+			 speed5=48;
 float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp1=12,ki=0,kd1=3.3,// 分段PID
 		kp2=7.8,ki2=0,kd2=2.15,  
@@ -37,20 +37,32 @@ float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp3=5.7,ki3=0,kd3=1.6,
 		kp4=2.3,ki4=0,kd4=0.65; //空转86*/
 
-		kp0=15.7,ki0=0,kd0=4.3,
-		kp1=11.5,ki=0,kd1=3.2,// 分段PID
-		kp2=8.5,ki2=0,kd2=2.45,  
-		kp3=5.4,ki3=0,kd3=1.55,
-		kp4=2.3,ki4=0,kd4=0.6; 
+	/*	kp0=15.3,ki0=0,kd0=4.05,
+		kp1=11.3,ki=0,kd1=3.2,// 分段PID
+		kp2=8.3,ki2=0,kd2=2.45,//2.48,  
+		kp3=5,ki3=0,kd3=1.5,
+		kp4=2,ki4=0,kd4=0.5; */
+		kp0=15.7,ki0=0,kd0=3.9,
+		kp1=11.7,ki=0,kd1=3.425,// 分段PID
+		kp2=8.2,ki2=0,kd2=2.4,//2.48,  
+		kp3=5.2,ki3=0,kd3=1.5,
+		kp4=3,ki4=0,kd4=0.65;
+
+
+
+
 float kp,ki,kd;
 int RIGHT,LEFT,MIDDLE,temp_fre[2],temp_steer_old,dtemp_steer;
 unsigned char Outdata[8];
 float sumerror,lasterror,Msetpoint=0,temp_middle=0,sensor_compensator=0,middleflag=0,start_left=0,start_right=0;
 int Set_speed,temp_speed,pwm;
 int speed_iError,speed_lastError,speed_prevError,Error[3],Sumerror;
-float speed_kp=5.4/2.5,
+float  	  speed_kp=5.4/2.5,
+		  speed_ki=1.1/2.5,
+		  speed_kd=0.258/2.5;
+/* speed_kp=5.4/2.5,
 	  speed_ki=1.1/2.5,
-	  speed_kd=0.258/2.5;
+	  speed_kd=0.258/2.5;*/
 
 
 /****************************************************************************************************************
@@ -372,7 +384,8 @@ void SpeedSet(void)
 	 if(temp_steer<30&&temp_steer>-30)  
     {
     	zd_flag++;
-        speed_target = speed1;
+    	if(zd_flag>100)
+        	speed_target = speed1;
     } 
     else if(temp_steer>-60 && temp_steer<60)
     {
@@ -419,6 +432,8 @@ void SpeedSet(void)
 *****************************************************************************************************************/
 void speed_control()
 {
+	if(StopFlag)
+		speed_target=0;
 	speed_iError=speed_target*2.5-currentspeed;
 	Error[2]=Error[1];
 	Error[1]=Error[0];
@@ -431,8 +446,8 @@ void speed_control()
 	temp_speed+=speed_kp*(Error[0]-Error[1])+speed_ki*Error[0]+speed_kd*(Error[0]-Error[1]-(Error[1]-Error[2]));
 	if(temp_speed>105)
 		temp_speed=105;
-	if(temp_speed<-90)
-			temp_speed=-90;
+	if(temp_speed<-50)
+			temp_speed=-50;
 	SET_motor(temp_speed);
 	speed_prevError=speed_iError;
 }

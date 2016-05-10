@@ -28,6 +28,7 @@ void initALL(void)
 	LCD_Init();
 	Supersonic();
 	initBeep();
+	ReedSwitch();
 	
 	enableIrq();
 }
@@ -90,7 +91,7 @@ void initEMIOS_0MotorAndSteer(void)
 	EMIOS_0.CH[9].CCR.B.MODE = 0x60;	/* Mode is OPWM Buffered */
 	EMIOS_0.CH[9].CCR.B.EDPOL = 1;	/* Polarity-leading edge sets output/trailing clears*/
 	EMIOS_0.CH[9].CADR.R = 1;	/* Leading edge when channel counter bus= */
-	EMIOS_0.CH[9].CBDR.R = 83;	/* Trailing edge when channel counter bus= */
+	EMIOS_0.CH[9].CBDR.R = 90;	/* Trailing edge when channel counter bus= */
 	
 	SIU.PCR[9].R = 0x0600;	/*[11:10]选择AFx 此处AF1 /* MPC56xxS: Assign EMIOS_0 ch 21 to pad */
 	
@@ -323,18 +324,25 @@ void Supersonic(void)
 /*********************拨码开关、按键初始化************************/
 void initKeys_Switchs(void)
 {
-	SIU.PCR[24].R = 0x0100;               // PB[8]: Input  switch6 SIU.GPDO[64].B.PDI 
-	SIU.PCR[48].R = 0x0100;               // PD[0]: Input  switch5
-	SIU.PCR[50].R = 0x0100;               // PD[2]: Input  switch4
-	SIU.PCR[52].R = 0x0100;               // PD[4]: Input  switch3
-	SIU.PCR[54].R = 0x0100;               // PD[6]: Input  switch2
-	SIU.PCR[56].R = 0x0100;               // PD[8]: Input  switch1
+	SIU.PCR[24].R = 0x0103;               // PB[8]: Input  switch6 SIU.GPDO[64].B.PDI 
+	SIU.PCR[48].R = 0x0103;               // PD[0]: Input  switch5
+	SIU.PCR[50].R = 0x0103;               // PD[2]: Input  switch4
+	SIU.PCR[52].R = 0x0103;               // PD[4]: Input  switch3
+	SIU.PCR[54].R = 0x0103;               // PD[6]: Input  switch2
+	SIU.PCR[56].R = 0x0103;               // PD[8]: Input  switch1
 }
 
 /*************************蜂鸣器*****************************/
 void initBeep(void)
 {
 	SIU.PCR[43].R=0X0203;
+}
+
+/*************************干簧管****************************/
+void ReedSwitch(void)
+{
+	SIU.PCR[63].R=0x0103;
+	SIU.PCR[15].R=0x0103;
 }
 /*void SAIC_INIT(void)
 {

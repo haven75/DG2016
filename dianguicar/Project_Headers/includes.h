@@ -15,6 +15,7 @@
 #include "Supersonic.h"
 #include "Beep.h"
 #include "AD_Scan.h"
+#include "ReedSwitch.h"
 
 
 

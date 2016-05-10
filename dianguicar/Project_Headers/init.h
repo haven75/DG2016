@@ -27,6 +27,7 @@ void initADC(void);
 void initALL(void);
 void Supersonic(void);
 void initBeep(void);
+void ReedSwitch(void);
 
 
 //*************************************************************************

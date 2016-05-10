@@ -9,7 +9,7 @@
 
 
 
-unsigned char Supersonic_flag=0,f;
+unsigned char Supersonic_flag=0;
 unsigned int t1,t2,Supersonic_Time;
 void Supersonic_Trig(void)
 {
@@ -25,10 +25,8 @@ void Supersonic_Trig(void)
 void Supersonic_Echo(void)
 {
 	Supersonic_flag=1;
-	f++;
 	t1=EMIOS_0.CH[7].CADR.R;
 	t2=EMIOS_0.CH[7].CBDR.R;
-	Beep_ON();
 	if(t1>t2)
 		Supersonic_Time=t1-t2;
 	else
@@ -36,7 +34,6 @@ void Supersonic_Echo(void)
 	Dis_Num(64,3,(WORD) Supersonic_Time,5);
 	Dis_Num(20,4,(WORD) t1,5);
 	Dis_Num(20,5,(WORD) t2,5);
-	Dis_Num(20,0,(WORD) f,5);
 	EMIOS_0.CH[7].CSR.B.FLAG=1; 
 }
 
