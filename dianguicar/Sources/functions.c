@@ -21,10 +21,10 @@ unsigned int left,right,middle,flag=0,zd_flag=0; //车子在赛道的位置标志
 unsigned int count1,count2,currentspeed,speed_target,speed[10],tempspeed; 
 unsigned int presteer,currentsteer,dsteer;
 unsigned int speed1=58,
-			 speed2=48,
-			 speed3=48,
-			 speed4=48,
-			 speed5=48;
+			 speed2=49,
+			 speed3=47,
+			 speed4=45,
+			 speed5=43;
 float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp1=12,ki=0,kd1=3.3,// 分段PID
 		kp2=7.8,ki2=0,kd2=2.15,  
@@ -42,10 +42,15 @@ float  /*	kp0=16.5,ki0=0,kd0=4.2,
 		kp2=8.3,ki2=0,kd2=2.45,//2.48,  
 		kp3=5,ki3=0,kd3=1.5,
 		kp4=2,ki4=0,kd4=0.5; */
-		kp0=15.7,ki0=0,kd0=3.9,
-		kp1=11.7,ki=0,kd1=3.425,// 分段PID
+	/*	kp0=15.7,ki0=0,kd0=3.9,
+		kp1=11.6,ki=0,kd1=3.425,// 分段PID
 		kp2=8.2,ki2=0,kd2=2.4,//2.48,  
 		kp3=5.2,ki3=0,kd3=1.5,
+		kp4=3,ki4=0,kd4=0.65;*/
+		kp0=15.7,ki0=0,kd0=3.9,
+		kp1=11.7,ki=0,kd1=3.4,// 分段PID
+		kp2=8.2,ki2=0,kd2=2.35,//2.48,  
+		kp3=5.2,ki3=0,kd3=1.4,
 		kp4=3,ki4=0,kd4=0.65;
 
 
@@ -569,7 +574,7 @@ void Get_speed()  //定时2mse采速度
 *****************************************************************************************************************/
 void Set_Middlepoint()
 {
-	temp_middle=MIDDLE+11;
+	temp_middle=MIDDLE+9;
 	start_left=LEFT-14;
 	start_right=RIGHT-14;
 	sensor_compensator=RIGHT-LEFT;

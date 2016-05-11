@@ -42,7 +42,7 @@ void main(void)
 			}
 			SET_steer(steer);
 			SpeedSet();
-		//	speed_control();
+			speed_control();
 		}
 		Flag=0;
 		Senddata();
