@@ -25,6 +25,9 @@ void enableIrq(void);                    //开总中断
 //void SAIC_INIT(void);                    //输入捕捉
 void initADC(void);
 void initALL(void);
+void Supersonic(void);
+void initBeep(void);
+void ReedSwitch(void);
 
 
 //*************************************************************************
